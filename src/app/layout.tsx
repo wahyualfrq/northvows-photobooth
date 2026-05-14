@@ -36,11 +36,15 @@ export default function RootLayout({
             <h1 className="text-xl font-bold tracking-tighter text-foreground">NorthVows</h1>
           </div>
           
-          <div className="hidden md:flex items-center gap-8 pointer-events-auto">
+          <div className="hidden md:flex items-center gap-1 pointer-events-auto">
             {['Home', 'Frames', 'Photobooth', 'About'].map((item) => (
-              <Link key={item} href="/" className="group relative text-[10px] font-black uppercase tracking-[0.3em] text-foreground/40 hover:text-primary soft-transition px-3 py-1">
-                {item}
-                <span className="absolute bottom-0 left-0 w-0 h-[1px] bg-primary transition-all duration-300 group-hover:w-full" />
+              <Link 
+                key={item} 
+                href="/" 
+                className="relative px-5 py-2 text-[10px] font-black uppercase tracking-[0.3em] text-foreground/40 hover:text-primary transition-all duration-300 group"
+              >
+                <span className="relative z-10">{item}</span>
+                <span className="absolute inset-0 bg-primary/5 rounded-full scale-0 group-hover:scale-100 transition-transform duration-300 -z-0" />
               </Link>
             ))}
           </div>
