@@ -111,7 +111,7 @@ export default function Home() {
       >
         <div className="relative w-32 h-32 sm:w-72 sm:h-72 opacity-90 hover:opacity-100 transition-opacity">
           <Image 
-            src="/images/cameraE.png" 
+            src="/images/cameraE.webp" 
             alt="Vintage Camera" 
             fill
             className="object-contain drop-shadow-2xl"
@@ -129,7 +129,7 @@ export default function Home() {
       >
         <div className="relative w-32 h-32 sm:w-64 sm:h-64 opacity-80 hover:opacity-100 transition-opacity">
           <Image 
-            src="/images/element2.png" 
+            src="/images/element2.webp" 
             alt="Scrapbook Element" 
             fill
             className="object-contain drop-shadow-xl"
@@ -147,7 +147,7 @@ export default function Home() {
       >
         <div className="relative w-28 h-28 sm:w-56 sm:h-56 opacity-80 hover:opacity-100 transition-opacity">
           <Image 
-            src="/images/element3.png" 
+            src="/images/element3.webp" 
             alt="Scrapbook Decoration" 
             fill
             className="object-contain drop-shadow-lg"

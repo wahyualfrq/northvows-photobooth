@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Camera, Menu, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -9,6 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -19,6 +21,10 @@ export default function Navbar() {
   }, []);
 
   const navLinks = ['Home', 'Frames', 'Photobooth', 'About'];
+
+  // Hide navbar on photobooth routes for immersive experience
+  // Moved after hooks to comply with Rules of Hooks
+  if (pathname.startsWith('/photobooth')) return null;
 
   return (
     <>
@@ -47,19 +53,19 @@ export default function Navbar() {
             {navLinks.map((item) => (
               <Link 
                 key={item} 
-                href="/" 
-                className="relative px-4 py-2 text-[9px] font-black uppercase tracking-[0.4em] text-foreground/30 hover:text-primary transition-all duration-300 group"
+                href={item === 'Home' ? '/' : `/${item.toLowerCase()}`} 
+                className="relative px-5 py-2 text-[10px] font-bold uppercase tracking-[0.3em] text-[#24344D]/40 hover:text-[#24344D] transition-all duration-300 group"
               >
                 <span className="relative z-10">{item}</span>
-                <span className="absolute inset-0 bg-primary/5 rounded-full scale-0 group-hover:scale-100 transition-transform duration-300 -z-0" />
+                <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-0 h-[1px] bg-[#24344D] transition-all duration-300 group-hover:w-1/2" />
               </Link>
             ))}
           </div>
 
           <div className="flex items-center gap-3 sm:gap-6">
-             <Link href="/photobooth" className="group flex items-center gap-2 px-4 py-2 sm:px-5 sm:py-2 bg-white/40 backdrop-blur-md border border-white/60 text-secondary rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-widest hover:bg-secondary hover:text-white soft-transition">
-                <Camera size={12} className="group-hover:rotate-12 transition-transform" />
-                <span className="hidden xs:block">Start Session</span>
+             <Link href="/photobooth" className="group flex items-center gap-2 px-5 py-2.5 bg-white/30 backdrop-blur-md border border-white/40 text-[#24344D] rounded-full text-[9px] font-bold uppercase tracking-widest hover:bg-[#5A7FB2] hover:text-white soft-transition shadow-sm">
+                <Camera size={13} className="group-hover:rotate-12 transition-transform" />
+                <span className="hidden xs:block">Photobooth</span>
              </Link>
           </div>
         </div>
