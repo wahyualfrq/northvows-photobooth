@@ -43,14 +43,6 @@ export default function RootLayout({
               </Link>
             ))}
           </div>
-
-          <div className="flex items-center gap-6 pointer-events-auto">
-             <Link href="/photobooth" className="flex items-center gap-2 px-5 py-2.5 bg-foreground text-background rounded-full text-xs font-bold shadow-lg hover:scale-105 soft-transition">
-                <Camera size={14} />
-                <span>Start Photobooth</span>
-             </Link>
-             <Heart size={20} className="text-foreground/40 hover:text-foreground cursor-pointer transition-colors" />
-          </div>
         </nav>
         {children}
       </body>

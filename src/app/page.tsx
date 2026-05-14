@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { frames } from '@/data/frames';
-import { ArrowRight, Sparkles, Heart, Star } from 'lucide-react';
+import { Camera, Sparkles, Heart, Star } from 'lucide-react';
 
 export default function Home() {
   return (
@@ -37,17 +37,7 @@ export default function Home() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1.2, ease: [0.23, 1, 0.32, 1] }}
         className="text-center max-w-4xl mx-auto z-10 flex flex-col items-center"
-      >
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.3 }}
-          className="flex items-center gap-3 px-4 py-2 bg-white/40 backdrop-blur-md rounded-full border border-white/60 mb-10 shadow-sm"
-        >
-          <Heart size={14} className="text-secondary" fill="currentColor" />
-          <span className="text-[10px] font-black uppercase tracking-[0.4em] text-secondary">Collect sweet moments</span>
-        </motion.div>
-        
+      >   
         <h1 className="text-6xl sm:text-8xl font-bold tracking-tight mb-8 text-foreground leading-[1] text-shadow-dreamy">
           Create sweet <br /> 
           <span className="serif-italic font-normal text-secondary pr-4">memories</span> 
@@ -66,7 +56,7 @@ export default function Home() {
             className="group relative inline-flex items-center justify-center px-12 py-5 bg-gradient-to-br from-secondary to-foreground text-primary-foreground rounded-full text-lg font-bold shadow-2xl shadow-secondary/30 transition-all gap-3 soft-transition border border-white/20 overflow-hidden"
           >
             <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-            Start Photobooth <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+            <Camera className="w-5 h-5 transition-transform group-hover:scale-110" /> Start Photobooth
           </motion.button>
         </Link>
       </motion.div>
@@ -133,7 +123,7 @@ export default function Home() {
 
       {/* Minimal Footer Info */}
       <div className="mt-12 text-[10px] font-black uppercase tracking-[0.5em] text-foreground/20 italic">
-        Memory Studio Vol. 01 • Est. 2026
+        Copyright by northvows • Est. 2026
       </div>
     </div>
   );
