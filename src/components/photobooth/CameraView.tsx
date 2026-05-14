@@ -3,7 +3,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import Webcam from 'react-webcam';
 import { motion, AnimatePresence } from 'framer-motion';
-import { RefreshCcw, Sparkles } from 'lucide-react';
+import { Camera, RefreshCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface CameraViewProps {
@@ -37,7 +37,7 @@ export default function CameraView({ onCapture, isCapturing }: CameraViewProps) 
 
     if (countdown === 0) {
       setFlash(true);
-      setTimeout(() => setFlash(false), 300);
+      setTimeout(() => setFlash(false), 200);
 
       const imageSrc = webcamRef.current?.getScreenshot();
       if (imageSrc) {
@@ -52,90 +52,86 @@ export default function CameraView({ onCapture, isCapturing }: CameraViewProps) 
   };
 
   return (
-    <div className="relative w-full aspect-square max-w-[500px] mx-auto group">
-      {/* Decorative Tape Corners */}
-      <div className="absolute -top-3 -left-3 w-12 h-6 bg-secondary/20 rotate-[-45deg] z-10 rounded-sm" />
-      <div className="absolute -top-3 -right-3 w-12 h-6 bg-secondary/20 rotate-[45deg] z-10 rounded-sm" />
-      
-      {/* Main Camera Container */}
-      <div className="relative w-full h-full overflow-hidden rounded-[40px] scrapbook-card border-[12px] border-white shadow-2xl">
-        <Webcam
-          audio={false}
-          ref={webcamRef}
-          screenshotFormat="image/png"
-          videoConstraints={{ ...videoConstraints, facingMode }}
-          mirrored={facingMode === "user"}
-          className="w-full h-full object-cover grayscale-[0.1] contrast-[1.1]"
-        />
+    <div className="w-full max-w-[500px] mx-auto space-y-12">
+      {/* Editorial Camera Container */}
+      <div className="relative aspect-square w-full editorial-card rounded-sm overflow-hidden p-2 bg-white">
+        <div className="w-full h-full overflow-hidden bg-muted/20 relative">
+          <Webcam
+            audio={false}
+            ref={webcamRef}
+            screenshotFormat="image/png"
+            videoConstraints={{ ...videoConstraints, facingMode }}
+            mirrored={facingMode === "user"}
+            className="w-full h-full object-cover"
+          />
 
-        {/* Flash Effect */}
-        <AnimatePresence>
-          {flash && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-white z-50"
-            />
-          )}
-        </AnimatePresence>
+          {/* Flash */}
+          <AnimatePresence>
+            {flash && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 bg-white z-50"
+              />
+            )}
+          </AnimatePresence>
 
-        {/* Countdown Overlay */}
-        <AnimatePresence>
-          {countdown !== null && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 flex items-center justify-center z-40 bg-primary/20 backdrop-blur-sm"
-            >
-              <motion.span 
-                key={countdown}
-                initial={{ scale: 0.5, y: 20 }}
-                animate={{ scale: 1, y: 0 }}
-                className="text-9xl font-bold text-white drop-shadow-lg font-serif italic"
+          {/* Countdown */}
+          <AnimatePresence>
+            {countdown !== null && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 flex items-center justify-center z-40 bg-black/5 backdrop-blur-[2px]"
               >
-                {countdown === 0 ? "♥" : countdown}
-              </motion.span>
-            </motion.div>
-          )}
-        </AnimatePresence>
+                <motion.span 
+                  key={countdown}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="text-9xl font-black text-white drop-shadow-2xl font-serif italic"
+                >
+                  {countdown === 0 ? "!" : countdown}
+                </motion.span>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
 
-        {/* Soft Vignette */}
-        <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-transparent via-transparent to-black/10" />
+        {/* Minimal Label Overlay */}
+        <div className="absolute top-6 right-6 px-3 py-1 bg-black/10 backdrop-blur-md rounded-full text-[8px] font-black uppercase tracking-[0.4em] text-white">
+          Studio Session Live
+        </div>
       </div>
 
-      {/* Camera Controls - Floating Style */}
-      <div className="mt-10 flex justify-center items-center gap-8">
+      {/* Shutter Controls */}
+      <div className="flex justify-center items-center gap-10">
         <motion.button
           whileHover={{ scale: 1.1, rotate: 180 }}
           whileTap={{ scale: 0.9 }}
           onClick={toggleCamera}
-          className="p-4 rounded-full bg-accent text-primary border border-border/50 shadow-sm transition-all"
+          className="p-4 rounded-full text-foreground/40 hover:text-primary hover:bg-primary/5 transition-all"
         >
           <RefreshCcw className="w-5 h-5" />
         </motion.button>
 
-        <div className="relative group/btn">
-          <div className="absolute inset-[-12px] rounded-full border-2 border-primary/20 scale-100 group-hover/btn:scale-110 transition-transform duration-500" />
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.9 }}
-            disabled={countdown !== null || isCapturing}
-            onClick={startCapture}
-            className={cn(
-              "relative w-20 h-20 rounded-full flex items-center justify-center transition-all",
-              "bg-primary text-primary-foreground shadow-xl shadow-primary/30",
-              (countdown !== null || isCapturing) && "opacity-50 cursor-not-allowed grayscale"
-            )}
-          >
-            <div className="w-16 h-16 rounded-full border-2 border-primary-foreground/20 flex items-center justify-center">
-               <Sparkles className="w-8 h-8" />
-            </div>
-          </motion.button>
-        </div>
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.9 }}
+          disabled={countdown !== null || isCapturing}
+          onClick={startCapture}
+          className={cn(
+            "relative w-24 h-24 rounded-full border-2 border-primary flex items-center justify-center p-2 group transition-all",
+            (countdown !== null || isCapturing) && "opacity-50 grayscale cursor-not-allowed"
+          )}
+        >
+          <div className="w-full h-full rounded-full bg-primary flex items-center justify-center text-primary-foreground group-hover:scale-95 transition-transform duration-500 shadow-xl shadow-primary/20">
+            <Camera className="w-8 h-8" />
+          </div>
+        </motion.button>
 
-        <div className="w-[52px]" /> {/* Spacer to balance the layout */}
+        <div className="w-[60px]" /> {/* Layout Balancer */}
       </div>
     </div>
   );

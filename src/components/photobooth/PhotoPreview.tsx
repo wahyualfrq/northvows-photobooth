@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Download, RefreshCcw, FlipHorizontal, Heart } from 'lucide-react';
+import { Download, RefreshCcw, FlipHorizontal } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { mergeImageWithFrame } from '@/lib/canvas';
 import { cn } from '@/lib/utils';
@@ -33,89 +33,81 @@ export default function PhotoPreview({ capturedImage, frameUrl, onRetake, onDown
     processImage();
   }, [capturedImage, frameUrl, isMirrored]);
 
-  const handleFlip = () => {
-    setIsMirrored(!isMirrored);
-  };
-
   return (
-    <div className="flex flex-col items-center gap-10 w-full max-w-md mx-auto">
-      <div className="text-center space-y-2">
-        <h2 className="text-2xl font-bold font-serif italic text-primary">Sweet Moment Captured!</h2>
-        <p className="text-sm text-muted-foreground">Ready to keep this memory forever?</p>
+    <div className="flex flex-col items-center gap-12 w-full max-w-lg mx-auto">
+      <div className="text-center space-y-4">
+        <div className="text-[10px] font-black text-primary/40 uppercase tracking-[0.6em]">Session Complete</div>
+        <h2 className="text-4xl sm:text-5xl font-black text-foreground tracking-tighter leading-none">
+          THE <span className="serif-italic font-normal text-primary">Result</span>
+        </h2>
       </div>
 
       <motion.div
-        initial={{ opacity: 0, scale: 0.9, rotate: -2 }}
+        initial={{ opacity: 0, scale: 0.98, rotate: -1 }}
         animate={{ opacity: 1, scale: 1, rotate: 0 }}
-        className="relative w-full aspect-[3/4] rounded-2xl overflow-hidden scrapbook-card border-[12px] border-white shadow-2xl group"
+        className="relative w-full aspect-[3/4] editorial-card p-3 sm:p-5 rounded-sm bg-white"
       >
-        {/* Tape Decor */}
-        <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-16 h-6 bg-primary/10 rotate-[2deg] z-10" />
+        <div className="absolute top-[-10px] left-1/2 -translate-x-1/2 tape-accent-minimal opacity-40" />
 
-        {isProcessing && !currentImage ? (
-          <div className="absolute inset-0 flex items-center justify-center bg-accent/30">
-            <RefreshCcw className="w-8 h-8 animate-spin text-secondary" />
-          </div>
-        ) : (
-          /* eslint-disable-next-line @next/next/no-img-element */
-          <img 
-            src={currentImage || ''} 
-            alt="Photobooth Result" 
-            className={cn(
-              "w-full h-full object-contain transition-opacity duration-300",
-              isProcessing ? "opacity-50" : "opacity-100"
-            )}
-          />
-        )}
-
-        {/* Floating Heart Decor */}
-        <div className="absolute bottom-6 right-6 text-primary/30 opacity-0 group-hover:opacity-100 transition-opacity">
-          <Heart size={24} fill="currentColor" />
+        <div className="w-full h-full bg-muted/20 relative overflow-hidden">
+          {isProcessing && !currentImage ? (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <RefreshCcw className="w-8 h-8 animate-spin text-primary/20" />
+            </div>
+          ) : (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img 
+              src={currentImage || ''} 
+              alt="Result" 
+              className={cn(
+                "w-full h-full object-contain transition-opacity duration-500",
+                isProcessing ? "opacity-50" : "opacity-100"
+              )}
+            />
+          )}
         </div>
       </motion.div>
 
-      <div className="grid grid-cols-3 gap-4 w-full px-2">
+      <div className="grid grid-cols-3 gap-6 w-full">
         <motion.button
-          whileHover={{ y: -4, backgroundColor: 'rgba(53, 92, 138, 0.05)' }}
+          whileHover={{ y: -4 }}
           whileTap={{ scale: 0.95 }}
-          onClick={handleFlip}
+          onClick={() => setIsMirrored(!isMirrored)}
           disabled={isProcessing}
           className={cn(
-            "flex flex-col items-center justify-center gap-2 py-4 px-2 rounded-2xl border-2 soft-transition",
-            !isMirrored ? "bg-primary/5 border-primary" : "border-border bg-white"
+            "flex flex-col items-center justify-center gap-3 py-6 px-4 rounded-full border border-border soft-transition",
+            !isMirrored ? "bg-primary text-white border-primary" : "bg-white text-foreground/60 hover:bg-muted"
           )}
         >
-          <FlipHorizontal className={cn("w-5 h-5", !isMirrored ? "text-primary" : "text-muted-foreground")} />
-          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Mirror</span>
+          <FlipHorizontal className="w-5 h-5" />
+          <span className="text-[9px] font-black uppercase tracking-[0.2em]">{isMirrored ? 'Normal' : 'Mirrored'}</span>
         </motion.button>
 
         <motion.button
-          whileHover={{ y: -4, backgroundColor: 'rgba(53, 92, 138, 0.05)' }}
+          whileHover={{ y: -4 }}
           whileTap={{ scale: 0.95 }}
           onClick={onRetake}
-          className="flex flex-col items-center justify-center gap-2 py-4 px-2 rounded-2xl border-2 border-border bg-white soft-transition"
+          className="flex flex-col items-center justify-center gap-3 py-6 px-4 rounded-full border border-border bg-white text-foreground/60 hover:bg-muted soft-transition"
         >
-          <RefreshCcw className="w-5 h-5 text-muted-foreground" />
-          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Retake</span>
+          <RefreshCcw className="w-5 h-5" />
+          <span className="text-[9px] font-black uppercase tracking-[0.2em]">Retake</span>
         </motion.button>
 
         <motion.button
-          whileHover={{ y: -4, scale: 1.02 }}
+          whileHover={{ y: -4, backgroundColor: '#24344D' }}
           whileTap={{ scale: 0.95 }}
           onClick={() => currentImage && onDownload(currentImage)}
           disabled={isProcessing || !currentImage}
-          className="flex flex-col items-center justify-center gap-2 py-4 px-2 rounded-2xl bg-primary text-primary-foreground shadow-lg shadow-primary/20 soft-transition disabled:opacity-50"
+          className="flex flex-col items-center justify-center gap-3 py-6 px-4 rounded-full bg-primary text-white shadow-xl shadow-primary/20 soft-transition disabled:opacity-50"
         >
           <Download className="w-5 h-5" />
-          <span className="text-[10px] font-bold uppercase tracking-widest">Save</span>
+          <span className="text-[9px] font-black uppercase tracking-[0.2em]">Archive</span>
         </motion.button>
       </div>
-
-      <div className="p-4 rounded-xl bg-accent/30 border border-border/50 text-center">
-        <p className="text-[10px] leading-relaxed text-brown/70 font-medium uppercase tracking-widest">
-          Memory preserved in your browser • Local processing only
-        </p>
-      </div>
+      
+      <p className="text-[9px] font-black text-foreground/20 uppercase tracking-[0.4em] text-center">
+        Editorial Memory • Seoul Studio Session • 2026
+      </p>
     </div>
   );
 }

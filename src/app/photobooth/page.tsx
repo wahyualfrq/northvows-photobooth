@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Sparkles, Heart } from 'lucide-react';
+import { ArrowLeft, MoveUpRight } from 'lucide-react';
 import Link from 'next/link';
 
 import FrameSelector from '@/components/photobooth/FrameSelector';
@@ -44,57 +44,64 @@ export default function PhotoboothPage() {
 
   return (
     <main className="min-h-screen bg-background flex flex-col relative overflow-hidden">
-      {/* Decorative background doodles */}
-      <div className="absolute top-[5%] right-[5%] text-primary/5 -z-10 rotate-12">
-         <Sparkles size={120} />
-      </div>
-      <div className="absolute bottom-[5%] left-[5%] text-brown/5 -z-10 -rotate-12">
-         <Heart size={100} fill="currentColor" />
-      </div>
+      {/* Subtle Editorial Background */}
+      <div className="editorial-bg" />
 
       {/* Header */}
-      <header className="p-6 sm:p-10 flex items-center justify-between max-w-6xl mx-auto w-full z-10">
-        <div className="flex items-center gap-6">
+      <header className="p-8 sm:p-12 flex items-center justify-between max-w-7xl mx-auto w-full z-10">
+        <div className="flex items-center gap-10">
           <Link href="/">
             <motion.button
               whileHover={{ scale: 1.1, x: -4 }}
               whileTap={{ scale: 0.9 }}
-              className="p-3 rounded-full bg-white border border-border shadow-sm hover:shadow-md transition-all text-primary"
+              className="p-3 rounded-full bg-white border border-border shadow-sm text-primary transition-all"
             >
               <ArrowLeft className="w-5 h-5" />
             </motion.button>
           </Link>
-          <div className="flex flex-col">
-            <h1 className="text-xl font-bold tracking-[0.2em] text-primary">NORTHVOWS</h1>
-            <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest opacity-60">Digital Studio</span>
+          <div className="flex flex-col gap-1">
+            <h1 className="text-xl font-black tracking-[0.4em] text-primary uppercase leading-none">NORTHVOWS</h1>
+            <div className="flex items-center gap-2">
+               <div className="w-4 h-[1px] bg-primary/20" />
+               <span className="text-[8px] uppercase font-black text-foreground/30 tracking-[0.4em]">Memory Archive</span>
+            </div>
           </div>
         </div>
         
-        <div className="hidden sm:flex items-center gap-3">
-          <div className="h-px w-8 bg-border" />
-          <span className="text-[10px] font-bold text-brown/70 uppercase tracking-[0.3em]">
-            {step === 'selection' && 'Step 01: Frame'}
-            {step === 'camera' && 'Step 02: Capture'}
-            {step === 'preview' && 'Step 03: Memory'}
+        <div className="hidden lg:flex items-center gap-8">
+          <div className="flex items-center gap-3">
+             <span className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">0{step === 'selection' ? '1' : step === 'camera' ? '2' : '3'}</span>
+             <div className="w-12 h-[1px] bg-border" />
+          </div>
+          <span className="serif-italic text-sm text-foreground/40">
+            {step === 'selection' && 'Layout Collection'}
+            {step === 'camera' && 'Live Session'}
+            {step === 'preview' && 'Review Memoir'}
           </span>
         </div>
       </header>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col items-center justify-center p-6 sm:pb-20 max-w-5xl mx-auto w-full gap-10 z-10">
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col items-center justify-center p-6 sm:pb-24 max-w-7xl mx-auto w-full gap-12 z-10">
         <AnimatePresence mode="wait">
           {step === 'selection' && (
             <motion.div
               key="selection"
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
-              className="w-full flex flex-col gap-12"
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.6, ease: [0.25, 1, 0.5, 1] }}
+              className="w-full flex flex-col gap-16"
             >
-              <div className="text-center space-y-3">
-                <h2 className="text-4xl font-bold text-foreground font-serif italic">Choose your mood</h2>
-                <p className="text-muted-foreground text-sm uppercase tracking-widest font-medium">Select a collectible layout for your story</p>
+              <div className="text-center space-y-4">
+                <h2 className="text-5xl sm:text-7xl font-black text-foreground tracking-tighter leading-none uppercase">
+                   SELECT <br /> <span className="serif-italic font-normal text-primary lowercase">the</span> STYLE.
+                </h2>
+                <div className="flex items-center justify-center gap-4 text-foreground/30">
+                  <div className="w-8 h-px bg-current" />
+                  <span className="text-[9px] font-black uppercase tracking-[0.6em]">Denim Series No. 01</span>
+                  <div className="w-8 h-px bg-current" />
+                </div>
               </div>
               <FrameSelector 
                 selectedFrame={selectedFrame} 
@@ -106,11 +113,10 @@ export default function PhotoboothPage() {
           {step === 'camera' && (
             <motion.div
               key="camera"
-              initial={{ opacity: 0, scale: 0.98 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 1.02 }}
-              transition={{ duration: 0.6 }}
-              className="w-full flex flex-col gap-10"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="w-full flex flex-col gap-12"
             >
               <CameraView 
                 onCapture={handleCapture} 
@@ -120,9 +126,10 @@ export default function PhotoboothPage() {
               <div className="flex justify-center">
                 <button 
                   onClick={() => setStep('selection')}
-                  className="text-[10px] font-bold text-muted-foreground hover:text-primary transition-colors uppercase tracking-[0.3em] px-4 py-2 rounded-full border border-border/50 bg-white shadow-sm"
+                  className="group flex items-center gap-3 text-[10px] font-black text-foreground/40 hover:text-primary transition-all uppercase tracking-[0.4em]"
                 >
-                  ← Back to frames
+                  <ArrowLeft className="w-3 h-3 transition-transform group-hover:-translate-x-1" />
+                  Change Layout
                 </button>
               </div>
             </motion.div>
@@ -131,9 +138,8 @@ export default function PhotoboothPage() {
           {step === 'preview' && capturedImage && (
             <motion.div
               key="preview"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
               className="w-full"
             >
               <PhotoPreview 
@@ -147,21 +153,14 @@ export default function PhotoboothPage() {
         </AnimatePresence>
       </div>
 
-      {/* Footer Step Indicator */}
-      <footer className="p-10 flex justify-center mt-auto">
-        <div className="flex gap-4">
-          {['selection', 'camera', 'preview'].map((s, i) => (
-            <div key={s} className="flex flex-col items-center gap-2">
-              <div 
-                className={cn(
-                  "h-1.5 rounded-full transition-all duration-700",
-                  step === s ? 'bg-primary w-12' : 'bg-border w-4'
-                )}
-              />
-            </div>
-          ))}
+      {/* Editorial Decorative Side Text */}
+      <div className="absolute right-12 bottom-12 hidden lg:block">
+        <div className="flex items-center gap-4 text-[9px] font-black uppercase tracking-[0.6em] text-foreground/10 rotate-90 origin-right">
+           <span>NORTHVOWS STUDIO</span>
+           <div className="w-8 h-px bg-current" />
+           <span>2026 ARCHIVE</span>
         </div>
-      </footer>
+      </div>
     </main>
   );
 }

@@ -1,176 +1,119 @@
 'use client';
 
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { frames } from '@/data/frames';
-import { ArrowRight, Sparkles, Heart, Star } from 'lucide-react';
-import { useRef } from 'react';
+import { ArrowRight, MoveUpRight } from 'lucide-react';
 
 export default function Home() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const { scrollY } = useScroll();
-  const y1 = useTransform(scrollY, [0, 500], [0, -50]);
-  const y2 = useTransform(scrollY, [0, 500], [0, 50]);
-
   return (
-    <div ref={containerRef} className="min-h-screen flex flex-col items-center justify-center p-6 sm:p-12 overflow-hidden relative">
-      {/* Immersive Dreamy Background */}
-      <div className="dreamy-bg" />
-      
-      {/* Floating Light Blobs */}
-      <motion.div 
-        animate={{ 
-          x: [0, 50, 0], 
-          y: [0, 30, 0],
-          scale: [1, 1.1, 1]
-        }}
-        transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute top-[-10%] left-[-5%] w-[40vw] h-[40vw] bg-primary/10 rounded-full blur-[100px] -z-10" 
-      />
-      <motion.div 
-        animate={{ 
-          x: [0, -40, 0], 
-          y: [0, 50, 0],
-          scale: [1, 1.2, 1]
-        }}
-        transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute bottom-[-10%] right-[-5%] w-[50vw] h-[50vw] bg-accent/20 rounded-full blur-[120px] -z-10" 
-      />
+    <div className="min-h-screen flex flex-col items-center justify-center p-6 sm:p-12 overflow-hidden relative">
+      {/* Subtle Editorial Background */}
+      <div className="editorial-bg" />
 
-      {/* Doodle Accents */}
-      <div className="absolute inset-0 pointer-events-none z-0">
+      {/* Main Editorial Hero */}
+      <div className="w-full max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 lg:gap-24 items-center z-10">
         <motion.div 
-          animate={{ rotate: 360 }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute top-[20%] left-[15%] text-primary opacity-10 hidden sm:block"
+          initial={{ opacity: 0, x: -30 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 1, ease: [0.25, 1, 0.5, 1] }}
+          className="space-y-10"
         >
-          <Sparkles size={40} />
-        </motion.div>
-        <motion.div 
-          animate={{ scale: [1, 1.2, 1], opacity: [0.1, 0.2, 0.1] }}
-          transition={{ duration: 4, repeat: Infinity }}
-          className="absolute top-[40%] right-[15%] text-brown hidden sm:block"
-        >
-          <Star size={24} fill="currentColor" />
-        </motion.div>
-      </div>
-
-      <motion.div 
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1.2, ease: [0.23, 1, 0.32, 1] }}
-        className="text-center max-w-4xl mx-auto z-10 relative"
-      >
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-white/20 blur-[80px] -z-10 rounded-full scale-150" />
-
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.3 }}
-          className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-white/40 backdrop-blur-md text-foreground/70 text-xs font-bold mb-10 border border-white/50 tracking-[0.2em] uppercase"
-        >
-          <Sparkles className="w-3.5 h-3.5 text-primary" />
-          <span>Korean Studio Aesthetic</span>
-        </motion.div>
-        
-        <h1 className="text-6xl sm:text-8xl font-bold tracking-tight mb-8 text-foreground leading-[1] text-shadow-soft">
-          Keep every <br /> 
-          <span className="text-primary italic font-serif relative">
-            sweet moment
-            <motion.div 
-              initial={{ width: 0 }}
-              animate={{ width: "100%" }}
-              transition={{ delay: 1, duration: 1.5 }}
-              className="absolute bottom-2 left-0 h-2 bg-accent/30 -z-10"
-            />
-          </span> 
-          <br /> forever ✨
-        </h1>
-        
-        <p className="text-lg sm:text-2xl text-foreground/60 mb-14 max-w-xl mx-auto leading-relaxed font-medium italic opacity-80">
-          Create dreamy photostrips and collectible memories 
-          in our digital vintage studio.
-        </p>
-
-        <Link href="/photobooth">
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="relative inline-block group"
-          >
-            <div className="absolute inset-0 bg-primary blur-2xl opacity-20 group-hover:opacity-40 transition-opacity rounded-full" />
-            <button className="relative flex items-center justify-center px-12 py-6 bg-gradient-to-br from-primary to-secondary text-primary-foreground rounded-full text-xl font-bold shadow-2xl shadow-primary/20 transition-all gap-4 soft-transition border border-white/20">
-              Start Photobooth <ArrowRight className="w-6 h-6" />
-            </button>
-          </motion.div>
-        </Link>
-      </motion.div>
-
-      <motion.div 
-        style={{ y: y1 }}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.8, duration: 1.5 }}
-        className="mt-32 w-full max-w-7xl px-4 relative"
-      >
-        <div className="flex gap-8 sm:gap-16 overflow-x-auto pb-20 pt-10 snap-x snap-mandatory hide-scrollbar">
-          {frames.map((frame, index) => (
+          <div className="space-y-4">
             <motion.div
-              key={frame.id}
-              initial={{ opacity: 0, rotate: index % 2 === 0 ? -4 : 4, y: 60 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              whileHover={{ 
-                y: -15, 
-                rotate: 0, 
-                scale: 1.05,
-                transition: { duration: 0.4 }
-              }}
-              transition={{ delay: 1 + index * 0.15, duration: 1 }}
-              className="flex-shrink-0 snap-center w-[240px] sm:w-[320px] relative scrapbook-card rounded-2xl p-4 sm:p-5 border-2 border-white/50 group"
+              transition={{ delay: 0.2 }}
+              className="text-[10px] font-black uppercase tracking-[0.6em] text-primary/50"
             >
-              <div className="absolute -top-5 left-1/2 -translate-x-1/2 tape-accent z-20 opacity-90 group-hover:opacity-100 transition-opacity shadow-sm" />
-              
-              <div className="aspect-[3/4] relative rounded-xl overflow-hidden bg-muted/20">
-                <div className="absolute inset-0 bg-gradient-to-tr from-black/5 via-transparent to-white/10 z-10 pointer-events-none" />
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img 
-                  src={frame.url} 
-                  alt={frame.name}
-                  className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
-                />
+              Editorial Sessions • 2026
+            </motion.div>
+            <h1 className="text-7xl sm:text-9xl font-black text-foreground leading-[0.9] tracking-tighter">
+              CAPTURE <br /> 
+              <span className="serif-italic font-normal text-primary pr-4">Authentic</span> <br />
+              MEMOIR.
+            </h1>
+          </div>
+          
+          <p className="text-lg sm:text-xl text-foreground/60 max-w-md leading-relaxed font-medium">
+            A vintage-inspired digital photobooth for modern memoirs. 
+            Denim editorials meet Korean studio culture.
+          </p>
+
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+            <Link href="/photobooth">
+              <motion.button
+                whileHover={{ scale: 1.05, backgroundColor: '#24344D' }}
+                whileTap={{ scale: 0.95 }}
+                className="inline-flex items-center justify-center px-10 py-5 bg-primary text-primary-foreground rounded-full text-lg font-bold shadow-2xl shadow-primary/10 transition-all gap-3 clean-transition"
+              >
+                Start Session <ArrowRight className="w-5 h-5" />
+              </motion.button>
+            </Link>
+            
+            <Link href="#collection" className="group">
+              <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-foreground/40 group-hover:text-primary transition-colors">
+                View Collection <MoveUpRight className="w-3 h-3 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
               </div>
-              
-              <div className="mt-6 flex items-center justify-between px-1">
-                <div className="flex flex-col">
-                  <span className="text-[10px] uppercase tracking-[0.3em] font-black text-primary/40 leading-none mb-1">Theme</span>
-                  <span className="text-sm font-bold text-foreground/80 tracking-widest">{frame.name}</span>
-                </div>
-                <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center text-primary/40">
-                   <Heart size={14} fill="currentColor" />
-                </div>
+            </Link>
+          </div>
+        </motion.div>
+
+        {/* Asymmetrical Photostrip Display */}
+        <div className="relative flex justify-center lg:justify-end">
+          <div className="relative w-full max-w-[400px] h-[550px] sm:h-[650px]">
+            {/* Main Photostrip */}
+            <motion.div
+              initial={{ opacity: 0, y: 50, rotate: -2 }}
+              animate={{ opacity: 1, y: 0, rotate: -3 }}
+              transition={{ delay: 0.4, duration: 1 }}
+              className="absolute top-0 right-0 w-[240px] sm:w-[300px] z-20 editorial-card p-4 sm:p-5 rounded-sm"
+            >
+              <div className="absolute top-[-10px] left-1/2 -translate-x-1/2 tape-accent-minimal opacity-60" />
+              <div className="aspect-[3/4] bg-muted/20 relative overflow-hidden">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={frames[0].url} alt="Denim Vibe" className="w-full h-full object-cover" />
+              </div>
+              <div className="mt-4 flex justify-between items-center px-1">
+                <span className="text-[9px] font-black uppercase tracking-widest text-primary/40">Studio 01</span>
+                <span className="serif-italic text-sm text-foreground/60">NorthVows</span>
               </div>
             </motion.div>
-          ))}
+
+            {/* Background Photostrip */}
+            <motion.div
+              initial={{ opacity: 0, y: 80, rotate: 5 }}
+              animate={{ opacity: 1, y: 30, rotate: 6 }}
+              transition={{ delay: 0.6, duration: 1.2 }}
+              className="absolute bottom-0 left-0 w-[200px] sm:w-[260px] z-10 editorial-card p-4 rounded-sm grayscale opacity-40 hover:opacity-80 transition-opacity"
+            >
+              <div className="aspect-[3/4] bg-muted/20 overflow-hidden">
+                 {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={frames[1].url} alt="Denim Vibe" className="w-full h-full object-cover" />
+              </div>
+            </motion.div>
+          </div>
         </div>
+      </div>
 
-        <motion.div 
-          style={{ y: y2 }}
-          className="absolute -bottom-10 right-20 text-brown/5 pointer-events-none hidden lg:block"
-        >
-          <span className="text-[180px] font-serif italic font-black leading-none tracking-tighter">Memories</span>
-        </motion.div>
-      </motion.div>
-
+      {/* Minimal Footer Branding */}
       <motion.div 
         initial={{ opacity: 0 }}
-        animate={{ opacity: 0.3 }}
-        transition={{ delay: 2 }}
-        className="mt-16 flex items-center gap-4 text-foreground/40 font-bold text-[10px] tracking-[0.5em] uppercase"
+        animate={{ opacity: 0.2 }}
+        transition={{ delay: 1.5 }}
+        className="absolute bottom-12 left-12 hidden lg:flex items-center gap-6"
       >
-        <div className="w-12 h-px bg-current" />
-        NorthVows Studio • Seoul to You
-        <div className="w-12 h-px bg-current" />
+        <span className="text-[10px] font-black uppercase tracking-[0.5em] vertical-text">Archive • 2026</span>
+        <div className="w-[1px] h-20 bg-foreground/20" />
       </motion.div>
+
+      <style jsx>{`
+        .vertical-text {
+          writing-mode: vertical-rl;
+          text-orientation: mixed;
+          transform: rotate(180deg);
+        }
+      `}</style>
     </div>
   );
 }

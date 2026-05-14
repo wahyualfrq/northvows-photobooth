@@ -2,15 +2,14 @@
   <defs>
     <mask id="cutout">
       <rect x="0" y="0" width="600" height="800" fill="white" />
-      <rect x="40" y="40" width="520" height="520" rx="30" fill="black" />
+      <rect x="40" y="40" width="520" height="520" rx="10" fill="black" />
     </mask>
   </defs>
-  <rect x="0" y="0" width="600" height="800" fill="#F5EBDD" mask="url(#cutout)" />
-  <rect x="40" y="40" width="520" height="520" rx="30" fill="none" stroke="#355C8A" stroke-width="2" stroke-dasharray="10 5" />
+  <rect x="0" y="0" width="600" height="800" fill="#F6F0E7" mask="url(#cutout)" />
+  <rect x="40" y="40" width="520" height="520" rx="10" fill="none" stroke="#355C8A" stroke-width="1.5" />
   
-  <text x="300" y="660" font-family="Plus Jakarta Sans, sans-serif" font-size="28" font-weight="700" fill="#355C8A" text-anchor="middle" letter-spacing="8">MEMORIES</text>
-  <text x="300" y="700" font-family="Plus Jakarta Sans, sans-serif" font-size="12" fill="#8A6B5A" text-anchor="middle" letter-spacing="4">KOREAN STUDIO STYLE</text>
+  <text x="60" y="660" font-family="Plus Jakarta Sans, sans-serif" font-size="42" font-weight="800" fill="#355C8A" letter-spacing="-1">MEMOIR</text>
+  <text x="60" y="700" font-family="Cormorant Garamond, serif" font-style="italic" font-size="22" fill="#8A6B5A">The Denim Collection</text>
   
-  {/* Heart Doodle */}
-  <path d="M 285 740 C 275 730 260 740 285 760 C 310 740 295 730 285 740" fill="#355C8A" opacity="0.8" />
+  <text x="540" y="700" font-family="Plus Jakarta Sans, sans-serif" font-size="12" font-weight="700" fill="#355C8A" text-anchor="end" opacity="0.4">EST. 2026</text>
 </svg>
