@@ -1,14 +1,14 @@
 @import "tailwindcss";
 
 :root {
-  --background: #F6F0E7; /* Warm Cream */
-  --foreground: #24344D; /* Muted Navy */
-  --primary: #355C8A;    /* Vintage Denim Blue */
-  --primary-foreground: #FFF9F2;
-  --secondary: #6C87A8;  /* Soft Dusty Blue */
-  --accent: #FFF9F2;     /* Soft Ivory */
-  --muted: #F6F0E7;
-  --muted-foreground: #6C87A8;
+  --background: #FAF7F2; /* Warm White */
+  --foreground: #2B3F59; /* Soft Navy */
+  --primary: #7FA6D6;    /* Sky Blue */
+  --primary-foreground: #FAF7F2;
+  --secondary: #4F6D91;  /* Vintage Denim Blue */
+  --accent: #AFC8E7;     /* Cloud Blue */
+  --muted: #F4EEE6;      /* Cream White */
+  --muted-foreground: #4F6D91;
   --border: #D9D2C5;
   --brown: #8A6B5A;
 }
@@ -37,22 +37,8 @@ body {
   min-height: 100vh;
 }
 
-/* Natural Paper Grain - Subtle */
-body::before {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0.04;
-  pointer-events: none;
-  background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
-  z-index: 9999;
-}
-
-/* Editorial Background Lighting - Subtle & Intentional */
-.editorial-bg {
+/* Atmospheric Cloudy Sky Background */
+.cloudy-sky-bg {
   position: fixed;
   top: 0;
   left: 0;
@@ -63,7 +49,7 @@ body::before {
   background: var(--background);
 }
 
-.editorial-bg::after {
+.cloudy-sky-bg::after {
   content: "";
   position: absolute;
   top: 0;
@@ -71,22 +57,29 @@ body::before {
   right: 0;
   bottom: 0;
   background: 
-    radial-gradient(circle at 10% 20%, rgba(108, 135, 168, 0.08) 0%, transparent 40%),
-    radial-gradient(circle at 90% 80%, rgba(53, 92, 138, 0.05) 0%, transparent 40%);
+    radial-gradient(circle at 50% 30%, rgba(127, 166, 214, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 10% 20%, rgba(175, 200, 231, 0.15) 0%, transparent 40%),
+    radial-gradient(circle at 90% 10%, rgba(244, 238, 230, 0.5) 0%, transparent 30%);
+}
+
+/* Subtle Floating Cloud Effects */
+.cloud-glow {
+  filter: blur(80px);
+  opacity: 0.4;
 }
 
 @layer utilities {
-  .editorial-card {
+  .memory-card {
     background: white;
     border: 1px solid var(--border);
-    box-shadow: 0 4px 20px -2px rgba(36, 52, 77, 0.05);
+    box-shadow: 0 8px 24px -4px rgba(43, 63, 89, 0.05);
   }
   
-  .tape-accent-minimal {
-    background: rgba(53, 92, 138, 0.15);
+  .tape-accent {
+    background: rgba(127, 166, 214, 0.2);
     width: 50px;
     height: 20px;
-    transform: rotate(-2deg);
+    transform: rotate(-3deg);
   }
 
   .hide-scrollbar::-webkit-scrollbar {
@@ -103,6 +96,6 @@ body::before {
   }
 }
 
-.clean-transition {
+.soft-lift {
   transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
 }

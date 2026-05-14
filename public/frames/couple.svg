@@ -2,13 +2,15 @@
   <defs>
     <mask id="cutout">
       <rect x="0" y="0" width="600" height="800" fill="white" />
-      <rect x="30" y="30" width="540" height="540" fill="black" />
+      <rect x="40" y="40" width="520" height="520" rx="4" fill="black" />
     </mask>
   </defs>
-  <rect x="0" y="0" width="600" height="800" fill="#355C8A" mask="url(#cutout)" />
+  <rect x="0" y="0" width="600" height="800" fill="#7FA6D6" mask="url(#cutout)" />
+  <rect x="40" y="40" width="520" height="520" rx="4" fill="none" stroke="#FAF7F2" stroke-width="2" opacity="0.3" />
   
-  <text x="300" y="660" font-family="Plus Jakarta Sans, sans-serif" font-size="36" font-weight="800" fill="#F6F0E7" text-anchor="middle" letter-spacing="10">NORTHVOWS</text>
-  <text x="300" y="700" font-family="Cormorant Garamond, serif" font-style="italic" font-size="18" fill="#F6F0E7" opacity="0.8" text-anchor="middle">Vintage Denim Editorial • No. 01</text>
+  <text x="300" y="660" font-family="Plus Jakarta Sans, sans-serif" font-size="32" font-weight="800" fill="#FAF7F2" text-anchor="middle" letter-spacing="4">NORTHVOWS</text>
+  <text x="300" y="700" font-family="Cormorant Garamond, serif" font-style="italic" font-size="16" fill="#FAF7F2" opacity="0.8" text-anchor="middle">Nostalgic Memory • Yearbook Vol. 1</text>
   
-  <rect x="280" y="740" width="40" height="1" fill="#F6F0E7" opacity="0.5" />
+  {/* Tiny Star Doodles */}
+  <path d="M 500 680 L 510 670 L 520 680 L 510 690 Z" fill="#FAF7F2" opacity="0.5" />
 </svg>

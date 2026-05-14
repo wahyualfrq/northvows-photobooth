@@ -3,117 +3,126 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { frames } from '@/data/frames';
-import { ArrowRight, MoveUpRight } from 'lucide-react';
+import { ArrowRight, Sparkles, Heart, Star } from 'lucide-react';
 
 export default function Home() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 sm:p-12 overflow-hidden relative">
-      {/* Subtle Editorial Background */}
-      <div className="editorial-bg" />
+      {/* Cloudy Sky Background */}
+      <div className="cloudy-sky-bg" />
+      
+      {/* Floating Cloud Glows */}
+      <div className="absolute top-[10%] left-[-5%] w-[40vw] h-[40vw] bg-primary/20 rounded-full cloud-glow -z-10" />
+      <div className="absolute bottom-[-10%] right-[-5%] w-[50vw] h-[50vw] bg-accent/30 rounded-full cloud-glow -z-10" />
 
-      {/* Main Editorial Hero */}
-      <div className="w-full max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 lg:gap-24 items-center z-10">
-        <motion.div 
-          initial={{ opacity: 0, x: -30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 1, ease: [0.25, 1, 0.5, 1] }}
-          className="space-y-10"
-        >
-          <div className="space-y-4">
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="text-[10px] font-black uppercase tracking-[0.6em] text-primary/50"
-            >
-              Editorial Sessions • 2026
-            </motion.div>
-            <h1 className="text-7xl sm:text-9xl font-black text-foreground leading-[0.9] tracking-tighter">
-              CAPTURE <br /> 
-              <span className="serif-italic font-normal text-primary pr-4">Authentic</span> <br />
-              MEMOIR.
-            </h1>
-          </div>
-          
-          <p className="text-lg sm:text-xl text-foreground/60 max-w-md leading-relaxed font-medium">
-            A vintage-inspired digital photobooth for modern memoirs. 
-            Denim editorials meet Korean studio culture.
-          </p>
-
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
-            <Link href="/photobooth">
-              <motion.button
-                whileHover={{ scale: 1.05, backgroundColor: '#24344D' }}
-                whileTap={{ scale: 0.95 }}
-                className="inline-flex items-center justify-center px-10 py-5 bg-primary text-primary-foreground rounded-full text-lg font-bold shadow-2xl shadow-primary/10 transition-all gap-3 clean-transition"
-              >
-                Start Session <ArrowRight className="w-5 h-5" />
-              </motion.button>
-            </Link>
-            
-            <Link href="#collection" className="group">
-              <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-foreground/40 group-hover:text-primary transition-colors">
-                View Collection <MoveUpRight className="w-3 h-3 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
-              </div>
-            </Link>
-          </div>
-        </motion.div>
-
-        {/* Asymmetrical Photostrip Display */}
-        <div className="relative flex justify-center lg:justify-end">
-          <div className="relative w-full max-w-[400px] h-[550px] sm:h-[650px]">
-            {/* Main Photostrip */}
-            <motion.div
-              initial={{ opacity: 0, y: 50, rotate: -2 }}
-              animate={{ opacity: 1, y: 0, rotate: -3 }}
-              transition={{ delay: 0.4, duration: 1 }}
-              className="absolute top-0 right-0 w-[240px] sm:w-[300px] z-20 editorial-card p-4 sm:p-5 rounded-sm"
-            >
-              <div className="absolute top-[-10px] left-1/2 -translate-x-1/2 tape-accent-minimal opacity-60" />
-              <div className="aspect-[3/4] bg-muted/20 relative overflow-hidden">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={frames[0].url} alt="Denim Vibe" className="w-full h-full object-cover" />
-              </div>
-              <div className="mt-4 flex justify-between items-center px-1">
-                <span className="text-[9px] font-black uppercase tracking-widest text-primary/40">Studio 01</span>
-                <span className="serif-italic text-sm text-foreground/60">NorthVows</span>
-              </div>
-            </motion.div>
-
-            {/* Background Photostrip */}
-            <motion.div
-              initial={{ opacity: 0, y: 80, rotate: 5 }}
-              animate={{ opacity: 1, y: 30, rotate: 6 }}
-              transition={{ delay: 0.6, duration: 1.2 }}
-              className="absolute bottom-0 left-0 w-[200px] sm:w-[260px] z-10 editorial-card p-4 rounded-sm grayscale opacity-40 hover:opacity-80 transition-opacity"
-            >
-              <div className="aspect-[3/4] bg-muted/20 overflow-hidden">
-                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={frames[1].url} alt="Denim Vibe" className="w-full h-full object-cover" />
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </div>
-
-      {/* Minimal Footer Branding */}
+      {/* Decorative Accents */}
       <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 0.2 }}
-        transition={{ delay: 1.5 }}
-        className="absolute bottom-12 left-12 hidden lg:flex items-center gap-6"
+        animate={{ scale: [1, 1.2, 1], opacity: [0.1, 0.3, 0.1] }}
+        transition={{ duration: 5, repeat: Infinity }}
+        className="absolute top-[15%] right-[15%] text-primary hidden sm:block"
       >
-        <span className="text-[10px] font-black uppercase tracking-[0.5em] vertical-text">Archive • 2026</span>
-        <div className="w-[1px] h-20 bg-foreground/20" />
+        <Sparkles size={32} />
+      </motion.div>
+      <motion.div 
+        animate={{ rotate: [0, 10, 0] }}
+        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute bottom-[20%] left-[10%] text-secondary/30 hidden sm:block"
+      >
+        <Star size={24} fill="currentColor" />
       </motion.div>
 
-      <style jsx>{`
-        .vertical-text {
-          writing-mode: vertical-rl;
-          text-orientation: mixed;
-          transform: rotate(180deg);
-        }
-      `}</style>
+      {/* Main Content (Centered) */}
+      <motion.div 
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1, ease: [0.25, 1, 0.5, 1] }}
+        className="text-center max-w-4xl mx-auto z-10 flex flex-col items-center"
+      >
+        {/* Aesthetic Badge */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.2 }}
+          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/60 backdrop-blur-md text-secondary text-[10px] font-black tracking-[0.4em] uppercase mb-10 border border-white/80 shadow-sm"
+        >
+          <Heart size={10} fill="currentColor" />
+          <span>School Memoir Collection</span>
+        </motion.div>
+        
+        {/* Hero Headline */}
+        <h1 className="text-6xl sm:text-8xl font-black tracking-tighter mb-8 text-foreground leading-[1] text-balance">
+          Create sweet <br /> 
+          <span className="serif-italic font-normal text-primary">memories</span> together.
+        </h1>
+        
+        {/* Emotional Description */}
+        <p className="text-lg sm:text-xl text-foreground/60 mb-12 max-w-xl leading-relaxed font-medium">
+          Capture nostalgic moments in our cloudy-blue digital studio. 
+          A collectible photobooth experience for your memory book.
+        </p>
+
+        {/* CTA Button */}
+        <Link href="/photobooth">
+          <motion.button
+            whileHover={{ scale: 1.05, y: -4 }}
+            whileTap={{ scale: 0.95 }}
+            className="inline-flex items-center justify-center px-12 py-5 bg-gradient-to-br from-primary to-secondary text-primary-foreground rounded-full text-lg font-bold shadow-xl shadow-primary/20 transition-all gap-3 soft-lift border border-white/20"
+          >
+            Start Session <ArrowRight className="w-5 h-5" />
+          </motion.button>
+        </Link>
+      </motion.div>
+
+      {/* Photostrip Preview Section - Scrapbook Yearbook Style */}
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.6, duration: 1 }}
+        className="mt-24 w-full max-w-6xl relative"
+      >
+        <div className="flex gap-6 sm:gap-10 overflow-x-auto pb-16 pt-10 snap-x snap-mandatory hide-scrollbar px-6">
+          {frames.map((frame, index) => (
+            <motion.div
+              key={frame.id}
+              initial={{ opacity: 0, rotate: index % 2 === 0 ? -2 : 2, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              whileHover={{ 
+                y: -10, 
+                rotate: 0, 
+                scale: 1.02,
+                transition: { duration: 0.3 }
+              }}
+              transition={{ delay: 0.8 + index * 0.1, duration: 0.8 }}
+              className="flex-shrink-0 snap-center w-[220px] sm:w-[280px] relative memory-card rounded-xl p-3 sm:p-4 border-2 border-white/80 group"
+            >
+              {/* Tape Accent */}
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 tape-accent z-20 opacity-80 group-hover:opacity-100 transition-opacity rounded-sm" />
+              
+              <div className="aspect-[3/4] relative rounded-lg overflow-hidden bg-muted/30">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img 
+                  src={frame.url} 
+                  alt={frame.name}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                />
+              </div>
+              
+              {/* Handwritten-style Caption */}
+              <div className="mt-4 text-center">
+                 <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/40 block mb-1">Layout</span>
+                 <span className="text-xs font-bold text-foreground/70 tracking-widest">{frame.name}</span>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </motion.div>
+
+      {/* Bottom Branding */}
+      <div className="mt-12 opacity-30 flex items-center gap-4">
+        <div className="w-12 h-px bg-foreground" />
+        <span className="text-[9px] font-black uppercase tracking-[0.5em]">Memory Archive • 2026</span>
+        <div className="w-12 h-px bg-foreground" />
+      </div>
     </div>
   );
 }
