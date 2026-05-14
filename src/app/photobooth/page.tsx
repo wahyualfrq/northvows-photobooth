@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Sparkles, Heart } from 'lucide-react';
 import Link from 'next/link';
 
 import FrameSelector from '@/components/photobooth/FrameSelector';
@@ -10,14 +10,12 @@ import CameraView from '@/components/photobooth/CameraView';
 import PhotoPreview from '@/components/photobooth/PhotoPreview';
 import { frames } from '@/data/frames';
 import { Frame } from '@/types';
-import { mergeImageWithFrame } from '@/lib/canvas';
+import { cn } from '@/lib/utils';
 
 export default function PhotoboothPage() {
   const [step, setStep] = useState<'selection' | 'camera' | 'preview'>('selection');
   const [selectedFrame, setSelectedFrame] = useState<Frame>(frames[0]);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
-  const [mergedImage, setMergedImage] = useState<string | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleFrameSelect = (frame: Frame) => {
     setSelectedFrame(frame);
@@ -31,7 +29,6 @@ export default function PhotoboothPage() {
 
   const handleRetake = () => {
     setCapturedImage(null);
-    setMergedImage(null);
     setStep('camera');
   };
 
@@ -46,33 +43,45 @@ export default function PhotoboothPage() {
   };
 
   return (
-    <main className="min-h-screen bg-background flex flex-col">
+    <main className="min-h-screen bg-background flex flex-col relative overflow-hidden">
+      {/* Decorative background doodles */}
+      <div className="absolute top-[5%] right-[5%] text-primary/5 -z-10 rotate-12">
+         <Sparkles size={120} />
+      </div>
+      <div className="absolute bottom-[5%] left-[5%] text-brown/5 -z-10 -rotate-12">
+         <Heart size={100} fill="currentColor" />
+      </div>
+
       {/* Header */}
-      <header className="p-6 flex items-center justify-between max-w-5xl mx-auto w-full">
-        <div className="flex items-center gap-4">
+      <header className="p-6 sm:p-10 flex items-center justify-between max-w-6xl mx-auto w-full z-10">
+        <div className="flex items-center gap-6">
           <Link href="/">
             <motion.button
-              whileHover={{ scale: 1.1 }}
+              whileHover={{ scale: 1.1, x: -4 }}
               whileTap={{ scale: 0.9 }}
-              className="p-2 rounded-full hover:bg-muted transition-colors"
+              className="p-3 rounded-full bg-white border border-border shadow-sm hover:shadow-md transition-all text-primary"
             >
-              <ArrowLeft className="w-6 h-6" />
+              <ArrowLeft className="w-5 h-5" />
             </motion.button>
           </Link>
-          <h1 className="text-xl font-bold tracking-tight">NORTHVOWS</h1>
+          <div className="flex flex-col">
+            <h1 className="text-xl font-bold tracking-[0.2em] text-primary">NORTHVOWS</h1>
+            <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest opacity-60">Digital Studio</span>
+          </div>
         </div>
         
-        <div className="hidden sm:block">
-          <span className="text-sm font-medium px-4 py-1.5 rounded-full bg-muted border border-border">
-            {step === 'selection' && 'Choose Frame'}
-            {step === 'camera' && 'Strike a Pose'}
-            {step === 'preview' && 'Ready!'}
+        <div className="hidden sm:flex items-center gap-3">
+          <div className="h-px w-8 bg-border" />
+          <span className="text-[10px] font-bold text-brown/70 uppercase tracking-[0.3em]">
+            {step === 'selection' && 'Step 01: Frame'}
+            {step === 'camera' && 'Step 02: Capture'}
+            {step === 'preview' && 'Step 03: Memory'}
           </span>
         </div>
       </header>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col items-center justify-center p-6 max-w-5xl mx-auto w-full gap-8">
+      <div className="flex-1 flex flex-col items-center justify-center p-6 sm:pb-20 max-w-5xl mx-auto w-full gap-10 z-10">
         <AnimatePresence mode="wait">
           {step === 'selection' && (
             <motion.div
@@ -80,11 +89,12 @@ export default function PhotoboothPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
               className="w-full flex flex-col gap-12"
             >
-              <div className="text-center">
-                <h2 className="text-3xl font-bold mb-2">Pick your aesthetic</h2>
-                <p className="text-muted-foreground text-lg">Choose a frame that matches your mood</p>
+              <div className="text-center space-y-3">
+                <h2 className="text-4xl font-bold text-foreground font-serif italic">Choose your mood</h2>
+                <p className="text-muted-foreground text-sm uppercase tracking-widest font-medium">Select a collectible layout for your story</p>
               </div>
               <FrameSelector 
                 selectedFrame={selectedFrame} 
@@ -96,22 +106,23 @@ export default function PhotoboothPage() {
           {step === 'camera' && (
             <motion.div
               key="camera"
-              initial={{ opacity: 0, scale: 0.95 }}
+              initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 1.05 }}
-              className="w-full flex flex-col gap-8"
+              exit={{ opacity: 0, scale: 1.02 }}
+              transition={{ duration: 0.6 }}
+              className="w-full flex flex-col gap-10"
             >
               <CameraView 
                 onCapture={handleCapture} 
-                isCapturing={isProcessing} 
+                isCapturing={false} 
               />
               
               <div className="flex justify-center">
                 <button 
                   onClick={() => setStep('selection')}
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
+                  className="text-[10px] font-bold text-muted-foreground hover:text-primary transition-colors uppercase tracking-[0.3em] px-4 py-2 rounded-full border border-border/50 bg-white shadow-sm"
                 >
-                  Change Frame
+                  ← Back to frames
                 </button>
               </div>
             </motion.div>
@@ -122,6 +133,7 @@ export default function PhotoboothPage() {
               key="preview"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
               className="w-full"
             >
               <PhotoPreview 
@@ -135,16 +147,18 @@ export default function PhotoboothPage() {
         </AnimatePresence>
       </div>
 
-      {/* Footer / Step Indicator */}
-      <footer className="p-8 flex justify-center mt-auto">
-        <div className="flex gap-2">
-          {['selection', 'camera', 'preview'].map((s) => (
-            <div 
-              key={s}
-              className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                step === s ? 'bg-primary w-6' : 'bg-muted-foreground/30'
-              }`}
-            />
+      {/* Footer Step Indicator */}
+      <footer className="p-10 flex justify-center mt-auto">
+        <div className="flex gap-4">
+          {['selection', 'camera', 'preview'].map((s, i) => (
+            <div key={s} className="flex flex-col items-center gap-2">
+              <div 
+                className={cn(
+                  "h-1.5 rounded-full transition-all duration-700",
+                  step === s ? 'bg-primary w-12' : 'bg-border w-4'
+                )}
+              />
+            </div>
           ))}
         </div>
       </footer>

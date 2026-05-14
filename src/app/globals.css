@@ -1,13 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fdfbf7; /* Very soft cream */
-  --foreground: #1a1a1a; /* Soft black */
-  --primary: #1a1a1a;
-  --primary-foreground: #fdfbf7;
-  --muted: #f4f2ec;
-  --muted-foreground: #737373;
-  --border: #e5e2db;
+  --background: #FFF9F1; /* Warm Ivory */
+  --foreground: #22324D; /* Muted Navy */
+  --primary: #355C8A;    /* Primary Blue */
+  --primary-foreground: #FFF9F1;
+  --secondary: #5876A1;  /* Soft Vintage Blue */
+  --accent: #F5EBDD;     /* Cream */
+  --muted: #F5EBDD;
+  --muted-foreground: #5876A1;
+  --border: #D9D2C5;
+  --brown: #8A6B5A;
 }
 
 @theme {
@@ -15,10 +18,13 @@
   --color-foreground: var(--foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
-  --font-sans: var(--font-inter);
+  --color-brown: var(--brown);
+  --font-sans: "Plus Jakarta Sans", var(--font-inter);
 }
 
 body {
@@ -26,13 +32,48 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans), sans-serif;
   -webkit-font-smoothing: antialiased;
+  position: relative;
+}
+
+/* Paper Texture & Grain */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.04;
+  pointer-events: none;
+  background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
+  z-index: 9999;
 }
 
 @layer utilities {
-  .glass-panel {
-    background: rgba(253, 251, 247, 0.7);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(229, 226, 219, 0.5);
+  .scrapbook-card {
+    background: white;
+    border: 1px solid var(--border);
+    box-shadow: 2px 4px 12px rgba(138, 107, 90, 0.1);
   }
+  
+  .tape-accent {
+    background: rgba(88, 118, 161, 0.2);
+    backdrop-filter: blur(2px);
+    width: 60px;
+    height: 24px;
+    transform: rotate(-3deg);
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+/* Custom transitions */
+.soft-transition {
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
 }
