@@ -7,7 +7,7 @@ import { Camera, Sparkles, Heart, Star } from 'lucide-react';
 
 export default function Home() {
   return (
-    <div className="min-h-screen flex flex-col items-center pt-60 p-6 sm:p-12 overflow-hidden relative">
+    <div className="min-h-screen flex flex-col items-center pt-80 p-6 sm:p-12 overflow-hidden relative">
       {/* Dreamy Sky Atmosphere */}
       <div className="sky-atmosphere" />
       
