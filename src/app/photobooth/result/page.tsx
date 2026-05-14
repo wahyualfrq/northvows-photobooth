@@ -8,7 +8,9 @@ import { layouts } from '@/data/layouts';
 import { Frame, Layout } from '@/types';
 import FrameSelector from '@/components/photobooth/FrameSelector';
 import PhotoStripPreview from '@/components/photobooth/PhotoStripPreview';
-import { ArrowLeft, Download, Sparkle, Star } from 'lucide-react';
+import { ArrowLeft, Download, Sparkle, Star, Loader2 } from 'lucide-react';
+import { toPng } from 'html-to-image';
+import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
 export default function ResultPage() {
@@ -17,6 +19,7 @@ export default function ResultPage() {
   const [selectedLayout, setSelectedLayout] = useState<Layout>(layouts[2]);
   const [selectedFrame, setSelectedFrame] = useState<Frame>(frames[0]);
   const [activeCategory, setActiveCategory] = useState('All Styles');
+  const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
     const savedPhotos = localStorage.getItem('northvows_captured_photos');
@@ -31,10 +34,32 @@ export default function ResultPage() {
     }
   }, [router]);
 
-  const handleDownload = () => {
-    // In a real app, we'd use html2canvas or a canvas-based approach to render the strip.
-    // For now, we'll simulate it.
-    alert('Generating high-resolution memoir...');
+  const handleDownload = async () => {
+    const element = document.getElementById('photo-strip-element');
+    if (!element) return;
+
+    try {
+      setIsDownloading(true);
+      
+      // Add a small delay to ensure high quality and CSS animations are settled
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      const dataUrl = await toPng(element, {
+        quality: 1,
+        pixelRatio: 3, // High resolution
+        cacheBust: true,
+      });
+
+      const link = document.createElement('a');
+      link.download = `northvows-memoir-${new Date().getTime()}.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch (err) {
+      console.error('Download failed:', err);
+      alert('Gagal mengunduh gambar. Silakan coba lagi.');
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   if (capturedPhotos.length === 0) return null;
@@ -82,10 +107,23 @@ export default function ResultPage() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={handleDownload}
-              className="flex items-center gap-4 px-12 py-6 bg-gradient-to-br from-[#AFCDF5] via-[#5A7FB2] to-[#24344D] text-white rounded-full text-sm font-black uppercase tracking-[0.3em] shadow-2xl shadow-[#5A7FB2]/30"
+              disabled={isDownloading}
+              className={cn(
+                "flex items-center gap-4 px-12 py-6 bg-gradient-to-br from-[#AFCDF5] via-[#5A7FB2] to-[#24344D] text-white rounded-full text-sm font-black uppercase tracking-[0.3em] shadow-2xl shadow-[#5A7FB2]/30 transition-all",
+                isDownloading && "opacity-80 cursor-wait"
+              )}
             >
-              <Download size={18} />
-              Save this memoir
+              {isDownloading ? (
+                <>
+                  <Loader2 size={18} className="animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                <>
+                  <Download size={18} />
+                  Save this memoir
+                </>
+              )}
             </motion.button>
           </div>
 
