@@ -1,16 +1,17 @@
 @import "tailwindcss";
 
 :root {
-  --background: #FFF9F1; /* Warm Ivory */
-  --foreground: #22324D; /* Muted Navy */
-  --primary: #355C8A;    /* Primary Blue */
-  --primary-foreground: #FFF9F1;
-  --secondary: #5876A1;  /* Soft Vintage Blue */
-  --accent: #F5EBDD;     /* Cream */
-  --muted: #F5EBDD;
-  --muted-foreground: #5876A1;
+  --background: #F7F1E8; /* Cream Base */
+  --foreground: #2C4365; /* Muted Navy */
+  --primary: #6F8FB8;    /* Soft Vintage Blue */
+  --primary-foreground: #FFF9F2;
+  --secondary: #8DA4C4;  /* Dusty Blue */
+  --accent: #C7D6E8;     /* Fog Blue */
+  --muted: #F7F1E8;
+  --muted-foreground: #8DA4C4;
   --border: #D9D2C5;
   --brown: #8A6B5A;
+  --warm-ivory: #FFF9F2;
 }
 
 @theme {
@@ -24,6 +25,7 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
   --color-brown: var(--brown);
+  --color-warm-ivory: var(--warm-ivory);
   --font-sans: "Plus Jakarta Sans", var(--font-inter);
 }
 
@@ -33,6 +35,7 @@ body {
   font-family: var(--font-sans), sans-serif;
   -webkit-font-smoothing: antialiased;
   position: relative;
+  min-height: 100vh;
 }
 
 /* Paper Texture & Grain */
@@ -43,25 +46,54 @@ body::before {
   left: 0;
   width: 100%;
   height: 100%;
-  opacity: 0.04;
+  opacity: 0.05;
   pointer-events: none;
   background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
   z-index: 9999;
+}
+
+/* Atmospheric Background Layers */
+.dreamy-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -10;
+  overflow: hidden;
+  background: var(--background);
+}
+
+.dreamy-bg::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 30%, rgba(111, 143, 184, 0.15) 0%, transparent 40%),
+    radial-gradient(circle at 80% 20%, rgba(199, 214, 232, 0.2) 0%, transparent 40%),
+    radial-gradient(circle at 50% 80%, rgba(44, 67, 101, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 0% 100%, rgba(247, 241, 232, 1) 0%, transparent 50%);
+  filter: blur(40px);
 }
 
 @layer utilities {
   .scrapbook-card {
     background: white;
     border: 1px solid var(--border);
-    box-shadow: 2px 4px 12px rgba(138, 107, 90, 0.1);
+    box-shadow: 0 10px 30px -5px rgba(44, 67, 101, 0.08), 
+                0 4px 10px -2px rgba(44, 67, 101, 0.04);
   }
   
   .tape-accent {
-    background: rgba(88, 118, 161, 0.2);
+    background: rgba(111, 143, 184, 0.25);
     backdrop-filter: blur(2px);
-    width: 60px;
+    width: 64px;
     height: 24px;
     transform: rotate(-3deg);
+    box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.2);
   }
 
   .hide-scrollbar::-webkit-scrollbar {
@@ -71,9 +103,16 @@ body::before {
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+
+  .premium-glow {
+    box-shadow: 0 0 40px rgba(111, 143, 184, 0.25);
+  }
+
+  .text-shadow-soft {
+    text-shadow: 0 2px 10px rgba(44, 67, 101, 0.1);
+  }
 }
 
-/* Custom transitions */
 .soft-transition {
-  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
 }
