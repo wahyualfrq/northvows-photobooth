@@ -27,7 +27,6 @@ export default function PhotoStripPreview({ photos, frame, layout }: PhotoStripP
       </div>
 
       <div 
-        id="photo-strip-element"
         className={cn(
           "scrapbook-card p-3 sm:p-4 transition-all duration-700 relative overflow-hidden flex flex-col gap-3 shadow-2xl",
           frame.theme === 'dark' ? "bg-[#24344D] text-white" : "bg-white text-[#24344D]"

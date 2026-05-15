@@ -14,6 +14,16 @@ import { layouts } from '@/data/layouts';
 import PhotoStripPreview from '@/components/photobooth/PhotoStripPreview';
 import { toPng } from 'html-to-image';
 
+interface StickerInstance {
+  id: string;
+  type: string;
+  content: any;
+  x: number;
+  y: number;
+  rotation: number;
+  scale: number;
+}
+
 export default function PreviewPage() {
   const [photos, setPhotos] = useState<string[]>([]);
   const [selectedFrame, setSelectedFrame] = useState(frames[0]);
@@ -22,6 +32,7 @@ export default function PreviewPage() {
   const [mounted, setMounted] = useState(false);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [stickers, setStickers] = useState<StickerInstance[]>([]);
 
   useEffect(() => {
     if (photos.length > 0) {
@@ -65,6 +76,9 @@ export default function PreviewPage() {
           if (layout) setSelectedLayout(layout);
         }
       }
+
+      const savedStickers = localStorage.getItem('northvows_stickers');
+      if (savedStickers) setStickers(JSON.parse(savedStickers));
     } catch (err) {
       // Silently handle localStorage errors in production
     }
@@ -158,12 +172,52 @@ export default function PreviewPage() {
                   {/* Photo Strip (The Static Memoir) */}
                   <div className="flex flex-col items-center w-full max-w-[280px]">
                      <h3 className="text-[10px] font-black text-[#24344D]/30 uppercase tracking-[0.5em] mb-6">Printed Strip</h3>
-                     <div className="w-full transform -rotate-1 hover:rotate-0 transition-transform duration-500">
+                     <div id="photo-strip-element" className="relative w-full bg-white sm:bg-transparent p-4 sm:p-0">
                         <PhotoStripPreview 
                            photos={photos} 
                            frame={selectedFrame} 
                            layout={selectedLayout} 
                         />
+                        {/* Static Stickers for Preview */}
+                        {stickers.map((sticker) => (
+                          <div
+                            key={sticker.id}
+                            style={{ 
+                              position: 'absolute', 
+                              left: `${sticker.x}%`, 
+                              top: `${sticker.y}%`,
+                              transform: `translate(-50%, -50%) rotate(${sticker.rotation}deg) scale(${sticker.scale})`,
+                              zIndex: 50,
+                              pointerEvents: 'none'
+                            }}
+                          >
+                            {sticker.type === 'tape' && (
+                              <div className={cn(
+                                "w-24 h-8 border shadow-md flex items-center justify-center opacity-90",
+                                sticker.content === 'grid' ? "bg-white bg-[radial-gradient(#00000022_1px,transparent_1px)] bg-[size:6px_6px]" : ""
+                              )} style={{ backgroundColor: sticker.content !== 'grid' ? sticker.content : 'transparent' }}>
+                                 <div className="w-full h-px bg-white/20" />
+                              </div>
+                            )}
+                            {sticker.type === 'sticker' && (
+                              <span className="text-5xl filter drop-shadow-2xl">{sticker.content}</span>
+                            )}
+                            {sticker.type === 'doodle' && (
+                              <div className="text-[#5A7FB2] filter drop-shadow-md">
+                                 {sticker.content === 'Cloud' || sticker.content?.name === 'Cloud' ? <Cloud size={36} fill="currentColor" /> :
+                                  sticker.content === 'Sparkle' || sticker.content?.name === 'Sparkle' ? <Sparkles size={36} fill="currentColor" /> :
+                                  sticker.content === 'Star' || sticker.content?.name === 'Star' ? <Star size={36} fill="currentColor" /> :
+                                  sticker.content === 'Heart' || sticker.content?.name === 'Heart' ? <Heart size={36} fill="currentColor" /> :
+                                  <Star size={36} fill="currentColor" />}
+                              </div>
+                            )}
+                            {sticker.type === 'text' && (
+                              <div className="bg-[#F6F0E8]/95 backdrop-blur-md px-5 py-2 border border-black/10 rounded shadow-lg">
+                                 <p className="text-[11px] font-serif italic text-[#24344D] whitespace-nowrap">{sticker.content}</p>
+                              </div>
+                            )}
+                          </div>
+                        ))}
                      </div>
                   </div>
 

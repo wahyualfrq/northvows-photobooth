@@ -43,6 +43,7 @@ export default function CameraView({ onComplete, selectedLayout, selectedFrame, 
   const [capturedPhotos, setCapturedPhotos] = useState<string[]>([]);
   const [isCapturing, setIsCapturing] = useState(false);
   const [isReviewing, setIsReviewing] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [retakeIndex, setRetakeIndex] = useState<number | null>(null);
   const [showUploadPrompt, setShowUploadPrompt] = useState(false);
   const totalShots = selectedLayout.rows * selectedLayout.cols;
@@ -237,8 +238,10 @@ export default function CameraView({ onComplete, selectedLayout, selectedFrame, 
   useEffect(() => {
     if (isReviewing && rawPhotos.length > 0) {
       const updateAll = async () => {
+        setIsProcessing(true);
         const processed = await Promise.all(rawPhotos.map(p => processSinglePhoto(p)));
         setCapturedPhotos(processed);
+        setIsProcessing(false);
       };
       updateAll();
     }
@@ -588,10 +591,23 @@ export default function CameraView({ onComplete, selectedLayout, selectedFrame, 
                 >
                   <button
                     onClick={() => onComplete(capturedPhotos)}
-                    className="w-full py-4 bg-secondary text-white rounded-2xl text-[9px] font-black uppercase tracking-[0.2em] shadow-lg shadow-secondary/20 hover:scale-[1.02] active:scale-[0.98] transition-all group flex items-center justify-center gap-2"
+                    disabled={isProcessing}
+                    className={cn(
+                      "w-full py-4 bg-secondary text-white rounded-2xl text-[9px] font-black uppercase tracking-[0.2em] shadow-lg shadow-secondary/20 hover:scale-[1.02] active:scale-[0.98] transition-all group flex items-center justify-center gap-2",
+                      isProcessing && "opacity-50 cursor-wait"
+                    )}
                   >
-                    Next Step
-                    <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />
+                    {isProcessing ? (
+                      <>
+                        <RefreshCcw size={12} className="animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        Next Step
+                        <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />
+                      </>
+                    )}
                   </button>
                 </motion.div>
               )}

@@ -189,13 +189,20 @@ export default function ResultPage() {
     setGenerationProgress(0);
     setGenerationStep(0);
 
+    // Save stickers and state to localStorage for persistence
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('northvows_stickers', JSON.stringify(stickers));
+      localStorage.setItem('northvows_selected_frame', JSON.stringify(selectedFrame));
+      localStorage.setItem('northvows_selected_layout', JSON.stringify(selectedLayout));
+    }
+
     // Simulated generation process - Exactly 6 seconds total
     for (let i = 0; i <= 100; i += 2) {
       setGenerationProgress(i);
       if (i === 25) setGenerationStep(1);
       if (i === 50) setGenerationStep(2);
       if (i === 75) setGenerationStep(3);
-      await new Promise(resolve => setTimeout(resolve, 120));
+      await new Promise(resolve => setTimeout(resolve, 60)); // Faster for better UX but still atmospheric
     }
 
     // Smooth transition to preview page
