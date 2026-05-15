@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import Webcam from 'react-webcam';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Camera, RefreshCcw, Layout as LayoutIcon, Wand2, Filter, FlipHorizontal, Timer, Image, X, ArrowRight } from 'lucide-react';
+import { Camera, RefreshCcw, Layout as LayoutIcon, Wand2, Filter, FlipHorizontal, Timer, Image as ImageIcon, X, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Frame, Layout } from '@/types';
 import { layouts } from '@/data/layouts';
@@ -14,12 +14,13 @@ interface CameraViewProps {
 }
 
 const filters = [
-  { id: 'none', name: 'Original', class: '' },
-  { id: 'cloudy', name: 'Cloudy Blue', class: 'brightness-[1.1] saturate-[0.8] hue-rotate-[10deg]' },
-  { id: 'vintage', name: 'Vintage Fade', class: 'sepia-[0.2] contrast-[0.9] brightness-[1.1]' },
-  { id: 'film', name: 'Soft Film', class: 'contrast-[0.8] brightness-[1.05] saturate-[0.9]' },
-  { id: 'denim', name: 'Cool Denim', class: 'saturate-[0.7] hue-rotate-[-10deg] brightness-[1.05]' },
-  { id: 'diary', name: 'Warm Diary', class: 'sepia-[0.3] saturate-[1.2] brightness-[0.95]' },
+  { id: 'none', name: 'Original', class: '', filter: 'none' },
+  { id: 'cloudy', name: 'Cloudy Blue', class: 'brightness-[1.1] saturate-[0.8] hue-rotate-[10deg]', filter: 'brightness(1.1) saturate(0.8) hue-rotate(10deg)' },
+  { id: 'vintage', name: 'Vintage Fade', class: 'sepia-[0.2] contrast-[0.9] brightness-[1.1]', filter: 'sepia(0.2) contrast(0.9) brightness(1.1)' },
+  { id: 'film', name: 'Soft Film', class: 'contrast-[0.8] brightness-[1.05] saturate-[0.9]', filter: 'contrast(0.8) brightness(1.05) saturate(0.9)' },
+  { id: 'denim', name: 'Cool Denim', class: 'saturate-[0.7] hue-rotate-[-10deg] brightness-[1.05]', filter: 'saturate(0.7) hue-rotate(-10deg) brightness(1.05)' },
+  { id: 'diary', name: 'Warm Diary', class: 'sepia-[0.3] saturate-[1.2] brightness-[0.95]', filter: 'sepia(0.3) saturate(1.2) brightness(0.95)' },
+  { id: 'bw', name: 'Noir Classic', class: 'grayscale brightness-[1.1] contrast-[1.1]', filter: 'grayscale(1) brightness(1.1) contrast(1.1)' },
 ];
 
 export default function CameraView({ onComplete, selectedLayout, selectedFrame, onLayoutChange }: CameraViewProps) {
@@ -34,7 +35,11 @@ export default function CameraView({ onComplete, selectedLayout, selectedFrame, 
   const [showTimerOptions, setShowTimerOptions] = useState(false);
   
   const [isMirrored, setIsMirrored] = useState(true);
+  const [mounted, setMounted] = useState(false);
+  const [currentDate, setCurrentDate] = useState("");
+  const [cameraError, setCameraError] = useState<string | null>(null);
   
+  const [rawPhotos, setRawPhotos] = useState<string[]>([]);
   const [capturedPhotos, setCapturedPhotos] = useState<string[]>([]);
   const [isCapturing, setIsCapturing] = useState(false);
   const [isReviewing, setIsReviewing] = useState(false);
@@ -83,6 +88,14 @@ export default function CameraView({ onComplete, selectedLayout, selectedFrame, 
     });
   };
 
+  useEffect(() => {
+    setMounted(true);
+    const date = new Date().toLocaleDateString('en-US', { 
+      year: '2-digit', month: '2-digit', day: '2-digit' 
+    }).replace(/\//g, ' ');
+    setCurrentDate(date);
+  }, []);
+
   const takeNextShot = useCallback(async () => {
     setCountdown(timerDuration);
   }, [timerDuration]);
@@ -99,16 +112,66 @@ export default function CameraView({ onComplete, selectedLayout, selectedFrame, 
       setFlash(true);
       setTimeout(() => setFlash(false), 200);
 
-      const imageSrc = webcamRef.current?.getScreenshot();
-      if (imageSrc) {
-        setCapturedPhotos(prev => {
+      const rawImage = webcamRef.current?.getScreenshot();
+      if (rawImage) {
+        setRawPhotos(prev => {
           if (retakeIndex !== null) {
             const next = [...prev];
-            next[retakeIndex] = imageSrc;
+            next[retakeIndex] = rawImage;
             return next;
           }
-          return [...prev, imageSrc];
+          return [...prev, rawImage];
         });
+
+        // Apply Filters & Overlays to the captured image
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            // 1. Apply Filter
+            ctx.filter = activeFilter.filter || 'none';
+            ctx.drawImage(img, 0, 0);
+
+            // 2. Apply Grain Effect
+            if (retroGrain) {
+               ctx.filter = 'none';
+               ctx.globalAlpha = 0.1;
+               ctx.globalCompositeOperation = 'overlay';
+               for (let i = 0; i < 50; i++) {
+                 ctx.fillStyle = i % 2 === 0 ? '#fff' : '#000';
+                 ctx.fillRect(Math.random() * canvas.width, Math.random() * canvas.height, 2, 2);
+               }
+               ctx.globalCompositeOperation = 'source-over';
+               ctx.globalAlpha = 1.0;
+            }
+
+            if (dateStamp) {
+              ctx.filter = 'none';
+              const dateStr = new Date().toLocaleDateString('en-US', { year: '2-digit', month: '2-digit', day: '2-digit' }).replace(/\//g, ' ');
+              ctx.font = 'bold 14px monospace';
+              ctx.fillStyle = 'rgba(249, 115, 22, 0.8)';
+              ctx.textAlign = 'right';
+              ctx.shadowColor = 'rgba(0,0,0,0.3)';
+              ctx.shadowBlur = 4;
+              ctx.fillText(dateStr, canvas.width - 40, canvas.height - 15);
+            }
+
+            const processedImage = canvas.toDataURL('image/png');
+            
+            setCapturedPhotos(prev => {
+              if (retakeIndex !== null) {
+                const next = [...prev];
+                next[retakeIndex] = processedImage;
+                return next;
+              }
+              return [...prev, processedImage];
+            });
+          }
+        };
+        img.src = rawImage;
       }
       setCountdown(null);
       setRetakeIndex(null);
@@ -129,6 +192,57 @@ export default function CameraView({ onComplete, selectedLayout, selectedFrame, 
       setIsReviewing(true);
     }
   }, [isCapturing, capturedPhotos.length, totalShots, countdown, takeNextShot, onComplete, capturedPhotos, retakeIndex]);
+
+  const processSinglePhoto = async (rawSrc: string): Promise<string> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.filter = activeFilter.filter || 'none';
+          ctx.drawImage(img, 0, 0);
+          if (retroGrain) {
+            ctx.filter = 'none';
+            ctx.globalAlpha = 0.1;
+            ctx.globalCompositeOperation = 'overlay';
+            for (let i = 0; i < 50; i++) {
+              ctx.fillStyle = i % 2 === 0 ? '#fff' : '#000';
+              ctx.fillRect(Math.random() * canvas.width, Math.random() * canvas.height, 2, 2);
+            }
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.globalAlpha = 1.0;
+          }
+          if (dateStamp) {
+            ctx.filter = 'none';
+            const dateStr = new Date().toLocaleDateString('en-US', { year: '2-digit', month: '2-digit', day: '2-digit' }).replace(/\//g, ' ');
+            ctx.font = 'bold 14px monospace';
+            ctx.fillStyle = 'rgba(249, 115, 22, 0.8)';
+            ctx.textAlign = 'right';
+            ctx.shadowColor = 'rgba(0,0,0,0.3)';
+            ctx.shadowBlur = 4;
+            ctx.fillText(dateStr, canvas.width - 40, canvas.height - 15);
+          }
+          resolve(canvas.toDataURL('image/png'));
+        } else {
+          resolve(rawSrc);
+        }
+      };
+      img.src = rawSrc;
+    });
+  };
+
+  useEffect(() => {
+    if (isReviewing && rawPhotos.length > 0) {
+      const updateAll = async () => {
+        const processed = await Promise.all(rawPhotos.map(p => processSinglePhoto(p)));
+        setCapturedPhotos(processed);
+      };
+      updateAll();
+    }
+  }, [activeFilter, retroGrain, dateStamp, isReviewing]);
 
   const handleRetake = (index: number) => {
     setRetakeIndex(index);
@@ -160,19 +274,28 @@ export default function CameraView({ onComplete, selectedLayout, selectedFrame, 
           {/* LCD Screen Area (Webcam Feed) */}
           <div className="absolute top-[16.2%] sm:top-[13%] left-[-0.4%] sm:left-[-2%] right-[19.5%] sm:right-[17%] bottom-[15.8%] sm:bottom-[11%] z-0 bg-black overflow-hidden shadow-inner">
             <div className="w-full h-full relative">
-              <Webcam
+               <Webcam
                 audio={false}
                 ref={webcamRef}
                 screenshotFormat="image/png"
                 videoConstraints={{ width: 1080, height: 1440, facingMode }}
                 mirrored={isMirrored}
+                onUserMediaError={() => setCameraError("Camera access denied")}
                 className={cn("w-full h-full object-cover transition-all duration-700", activeFilter.class)}
               />
 
+              {cameraError && (
+                <div className="absolute inset-0 bg-[#24344D] flex flex-col items-center justify-center p-6 text-center z-50">
+                  <Camera className="w-8 h-8 text-white/20 mb-4" />
+                  <p className="text-[10px] font-black text-white uppercase tracking-widest mb-2">{cameraError}</p>
+                  <p className="text-[8px] text-white/40 uppercase tracking-widest max-w-[150px]">Please enable camera access in your browser settings to continue.</p>
+                </div>
+              )}
+
               {/* Retro Grain Effect */}
               {retroGrain && (
-                <div className="absolute inset-0 pointer-events-none opacity-40 mix-blend-overlay z-10 animate-grain" 
-                     style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/natural-paper.png")' }} />
+                <div className="absolute inset-0 pointer-events-none opacity-20 mix-blend-overlay z-10 animate-grain" 
+                     style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }} />
               )}
 
               {/* Session Overlay Inside LCD */}
@@ -188,14 +311,14 @@ export default function CameraView({ onComplete, selectedLayout, selectedFrame, 
                    </div>
                 </div>
 
-                 {/* Date Stamp Overlay */}
-                 {dateStamp && (
-                   <div className="flex flex-col items-end">
-                      <span className="text-[10px] font-mono text-orange-500/80 drop-shadow-[0_0_2px_rgba(249,115,22,0.5)] font-bold tracking-widest">
-                        {new Date().toLocaleDateString('en-US', { year: '2-digit', month: '2-digit', day: '2-digit' }).replace(/\//g, ' ')}
-                      </span>
-                   </div>
-                 )}
+                  {/* Date Stamp */}
+                  {dateStamp && mounted && (
+                    <div className="flex flex-col items-end">
+                       <span className="text-[6px] font-mono text-orange-500/80 drop-shadow-[0_0_2px_rgba(249,115,22,0.5)] font-bold tracking-widest">
+                         {currentDate}
+                       </span>
+                    </div>
+                  )}
               </div>
 
               {/* Flash */}
@@ -244,7 +367,7 @@ export default function CameraView({ onComplete, selectedLayout, selectedFrame, 
             disabled={isCapturing}
             className="p-3 rounded-full text-[#24344D]/30 hover:text-secondary hover:bg-white transition-all shadow-sm disabled:opacity-20"
           >
-            <Image className="w-4 h-4" />
+            <ImageIcon className="w-4 h-4" />
             <input 
               id="gallery-upload"
               type="file" 
@@ -424,7 +547,7 @@ export default function CameraView({ onComplete, selectedLayout, selectedFrame, 
                         initial={{ scale: 1.2, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         src={capturedPhotos[i]} 
-                        className={cn("w-full h-full object-cover", activeFilter.class)}
+                        className="w-full h-full object-cover"
                         alt={`Shot ${i + 1}`}
                       />
                       
@@ -609,7 +732,7 @@ export default function CameraView({ onComplete, selectedLayout, selectedFrame, 
                 <div className="w-full aspect-[4/5] bg-[#1a1a1a] rounded-[1px] relative overflow-hidden mb-8 shadow-inner group/photo transition-transform duration-700">
                   <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center space-y-4">
                      <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center text-white/20 group-hover/photo:scale-110 group-hover/photo:text-secondary transition-all duration-500">
-                        <Image size={32} strokeWidth={1} />
+                        <ImageIcon size={32} strokeWidth={1} />
                      </div>
                      <div className="space-y-1">
                         <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Select {totalShots} Photos</p>
@@ -618,7 +741,7 @@ export default function CameraView({ onComplete, selectedLayout, selectedFrame, 
                   </div>
                   
                   {/* Subtle Grain Texture Over Photo Area */}
-                  <div className="absolute inset-0 pointer-events-none opacity-[0.03] mix-blend-overlay bg-[url('https://www.transparenttextures.com/patterns/natural-paper.png')]" />
+                  <div className="absolute inset-0 pointer-events-none opacity-[0.03] mix-blend-overlay bg-[url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E')]" />
                   
                   {/* Inner Shadow Glow */}
                   <div className="absolute inset-0 pointer-events-none shadow-[inset_0_0_40px_rgba(0,0,0,0.4)]" />
@@ -659,7 +782,7 @@ export default function CameraView({ onComplete, selectedLayout, selectedFrame, 
                 </div>
 
                 {/* Subtle Paper Grain Global */}
-                <div className="absolute inset-0 pointer-events-none opacity-[0.02] bg-[url('https://www.transparenttextures.com/patterns/natural-paper.png')]" />
+                <div className="absolute inset-0 pointer-events-none opacity-[0.02] bg-[url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E')]" />
               </div>
             </motion.div>
           </motion.div>

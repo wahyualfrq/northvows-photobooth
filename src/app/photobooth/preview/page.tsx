@@ -3,21 +3,25 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  ArrowLeft, Download, Share2, QrCode, Sparkles, Heart, 
-  Star, Cloud, Sun, Flower, RefreshCcw, Home, Smartphone,
-  CheckCircle2, Sparkle
+  ArrowLeft, Download, Share2, Sparkles, Heart, 
+  Star, Cloud, Sun, Flower, RefreshCcw, Smartphone,
+  CheckCircle2, QrCode
 } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { frames } from '@/data/frames';
 import { layouts } from '@/data/layouts';
+import PhotoStripPreview from '@/components/photobooth/PhotoStripPreview';
+import { toPng } from 'html-to-image';
 
 export default function PreviewPage() {
   const [photos, setPhotos] = useState<string[]>([]);
   const [selectedFrame, setSelectedFrame] = useState(frames[0]);
   const [selectedLayout, setSelectedLayout] = useState(layouts[0]);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
     if (photos.length > 0) {
@@ -29,24 +33,70 @@ export default function PreviewPage() {
   }, [photos]);
 
   useEffect(() => {
+    setMounted(true);
     // Load state from localStorage
-    const savedPhotos = localStorage.getItem('northvows_captured_photos');
-    const savedFrameId = localStorage.getItem('northvows_selected_frame');
-    const savedLayoutId = localStorage.getItem('northvows_selected_layout');
+    try {
+      const savedPhotos = localStorage.getItem('northvows_captured_photos');
+      const savedFrameId = localStorage.getItem('northvows_selected_frame');
+      const savedLayoutId = localStorage.getItem('northvows_selected_layout');
 
-    if (savedPhotos) setPhotos(JSON.parse(savedPhotos));
-    if (savedFrameId) {
-      const frame = frames.find(f => f.id === savedFrameId);
-      if (frame) setSelectedFrame(frame);
+      if (savedPhotos) setPhotos(JSON.parse(savedPhotos));
+      
+      if (savedFrameId) {
+        try {
+          const parsed = JSON.parse(savedFrameId);
+          const id = typeof parsed === 'string' ? parsed : parsed.id;
+          const frame = frames.find(f => f.id === id);
+          if (frame) setSelectedFrame(frame);
+        } catch (e) {
+          const frame = frames.find(f => f.id === savedFrameId);
+          if (frame) setSelectedFrame(frame);
+        }
+      }
+      
+      if (savedLayoutId) {
+        try {
+          const parsed = JSON.parse(savedLayoutId);
+          const id = typeof parsed === 'string' ? parsed : parsed.id;
+          const layout = layouts.find(l => l.id === id);
+          if (layout) setSelectedLayout(layout);
+        } catch (e) {
+          const layout = layouts.find(l => l.id === savedLayoutId);
+          if (layout) setSelectedLayout(layout);
+        }
+      }
+    } catch (err) {
+      // Silently handle localStorage errors in production
     }
-    if (savedLayoutId) {
-      const layout = layouts.find(l => l.id === savedLayoutId);
-      if (layout) setSelectedLayout(layout);
-    }
-
-    // Trigger entrance animation
-    setTimeout(() => setIsLoaded(true), 300);
+    
+    const timer = setTimeout(() => setIsLoaded(true), 1000);
+    return () => clearTimeout(timer);
   }, []);
+
+  const handleDownload = async () => {
+    const element = document.getElementById('photo-strip-element');
+    if (!element) return;
+
+    try {
+      setIsDownloading(true);
+      const dataUrl = await toPng(element, {
+        pixelRatio: 3, // High quality
+        cacheBust: true,
+        backgroundColor: '#fff'
+      });
+
+      const link = document.createElement('a');
+      link.download = `northvows-memoir-${new Date().getTime()}.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch (err) {
+      console.error('Download failed:', err);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  if (!mounted) return null;
 
   return (
     <main className="min-h-screen bg-[#FAF8F4] overflow-x-hidden selection:bg-[#AFCDF5]/30">
@@ -54,30 +104,30 @@ export default function PreviewPage() {
       <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
          <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#AFCDF5]/10 rounded-full blur-[120px] animate-pulse" />
          <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-[#5A7FB2]/10 rounded-full blur-[120px] animate-pulse delay-700" />
-         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] mix-blend-overlay" />
+         <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E')] opacity-[0.05] mix-blend-overlay" />
       </div>
 
-      {/* Navigation */}
-      <nav className="relative z-50 max-w-[1400px] mx-auto px-6 py-8 flex justify-between items-center">
+      {/* Floating Navigation */}
+      <div className="absolute top-6 left-6 sm:top-8 sm:left-12 z-50">
          <Link href="/photobooth/result">
             <motion.button 
               whileHover={{ x: -4 }}
-              className="flex items-center gap-2 text-[10px] font-black text-[#24344D]/40 uppercase tracking-[0.4em] hover:text-[#24344D] transition-colors"
+              className="flex items-center gap-2 text-[10px] sm:text-[11px] font-black uppercase tracking-[0.4em] text-[#24344D]/60 hover:text-[#24344D] transition-colors"
             >
-               <ArrowLeft size={12} /> Back to Editor
+               <ArrowLeft size={12} /> BACK TO EDITOR
             </motion.button>
          </Link>
-         
-         <div className="flex items-center gap-4">
-            <div className="px-4 py-1.5 bg-white/80 backdrop-blur-md rounded-full border border-white shadow-sm flex items-center gap-2">
-               <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
-               <span className="text-[9px] font-bold text-[#24344D] uppercase tracking-widest">Memoir Ready</span>
-            </div>
+      </div>
+
+      <div className="absolute top-6 right-6 sm:top-8 sm:right-12 z-50">
+         <div className="px-4 py-1.5 bg-white/80 backdrop-blur-md rounded-full border border-white shadow-sm flex items-center gap-2">
+            <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
+            <span className="text-[9px] font-bold text-[#24344D] uppercase tracking-widest">Memoir Ready</span>
          </div>
-      </nav>
+      </div>
 
       {/* Header Section */}
-      <div className="max-w-[1400px] mx-auto px-6 pt-4 pb-12 text-center space-y-4">
+      <div className="max-w-[1400px] mx-auto px-6 pt-20 pb-6 text-center space-y-2">
          <motion.div
            initial={{ opacity: 0, y: 20 }}
            animate={{ opacity: 1, y: 0 }}
@@ -93,54 +143,72 @@ export default function PreviewPage() {
       </div>
 
       {/* Main Content Grid */}
-      <div className="max-w-[1400px] mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start pb-32">
+      <div className="max-w-[1400px] mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start pb-12">
          
-         {/* LEFT: Animated GIF / Photo Strip Preview */}
-         <div className="lg:col-span-7 flex justify-center">
+         {/* LEFT: Photo Strip & GIF Comparison */}
+         <div className="lg:col-span-8 flex justify-center">
             <motion.div
               initial={{ opacity: 0, y: 40 }}
               animate={isLoaded ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-              className="relative"
+              className="w-full"
             >
-               {/* Aesthetic Decorative Elements */}
-               <div className="absolute -top-12 -left-12 pointer-events-none opacity-20">
-                  <Sparkle size={48} className="text-[#AFCDF5] animate-spin-slow" />
-               </div>
-               <div className="absolute -bottom-8 -right-8 pointer-events-none opacity-20">
-                  <Heart size={40} className="text-[#5A7FB2] animate-bounce" />
-               </div>
-
-                  <div className="flex flex-col items-center w-full">
-                     {/* Minimalist GIF Header */}
-                     <h3 className="text-sm font-black text-[#24344D]/30 uppercase tracking-[0.5em] mb-4">GIF</h3>
-
-                     {/* Raw 1x1 GIF Preview (No container/shadow) */}
-                     <div className="relative aspect-[4/3] w-full max-w-[400px] overflow-hidden rounded-2xl">
-                        <img 
-                           src={photos[currentPhotoIndex]} 
-                           alt="Memory GIF"
-                           className="w-full h-full object-cover" 
+               <div className="flex flex-col sm:flex-row items-center sm:items-start justify-center gap-8 sm:gap-12">
+                  
+                  {/* Photo Strip (The Static Memoir) */}
+                  <div className="flex flex-col items-center w-full max-w-[280px]">
+                     <h3 className="text-[10px] font-black text-[#24344D]/30 uppercase tracking-[0.5em] mb-6">Printed Strip</h3>
+                     <div className="w-full transform -rotate-1 hover:rotate-0 transition-transform duration-500">
+                        <PhotoStripPreview 
+                           photos={photos} 
+                           frame={selectedFrame} 
+                           layout={selectedLayout} 
                         />
                      </div>
                   </div>
+
+                  {/* Vertical Divider */}
+                  <div className="hidden sm:block w-px h-[400px] bg-gradient-to-b from-transparent via-[#24344D]/5 to-transparent self-center" />
+
+                  {/* Animated GIF (The Dynamic Moment) */}
+                  <div className="flex flex-col items-center w-full max-w-[400px]">
+                     <h3 className="text-[10px] font-black text-[#24344D]/30 uppercase tracking-[0.5em] mb-6">GIF Moment</h3>
+                     
+                     <div className="relative w-full aspect-[4/3] overflow-hidden rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.06)] border border-white">
+                        <img 
+                           src={photos[currentPhotoIndex]} 
+                           alt="Memory GIF"
+                           className="w-full h-full object-cover grayscale-[0.05] brightness-105" 
+                        />
+                        {/* Aesthetic Overlays */}
+                        <div className="absolute inset-0 pointer-events-none bg-gradient-to-tr from-white/0 via-white/5 to-white/10 opacity-30" />
+                     </div>
+
+                     {/* Sub-label */}
+                     <div className="mt-6 flex items-center gap-3 opacity-20">
+                        <div className="h-px w-6 bg-[#24344D]" />
+                        <span className="text-[9px] font-bold text-[#24344D] uppercase tracking-[0.2em]">Northvows Memories</span>
+                        <div className="h-px w-6 bg-[#24344D]" />
+                     </div>
+                  </div>
+               </div>
             </motion.div>
          </div>
 
          {/* RIGHT: QR Memory Card */}
-         <div className="lg:col-span-5 flex flex-col gap-8">
+         <div className="lg:col-span-4 flex flex-col gap-6">
             <motion.div
               initial={{ opacity: 0, x: 40 }}
               animate={isLoaded ? { opacity: 1, x: 0 } : {}}
               transition={{ duration: 1, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-              className="bg-white rounded-[40px] p-8 sm:p-10 shadow-[0_30px_80px_-15px_rgba(0,0,0,0.08)] border border-white relative overflow-hidden"
+              className="bg-white rounded-[32px] p-6 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.06)] border border-white relative overflow-hidden"
             >
                {/* QR Pattern Background */}
-               <div className="absolute top-0 right-0 w-32 h-32 bg-[#AFCDF5]/5 rounded-bl-[100px] -z-10" />
+               <div className="absolute top-0 right-0 w-24 h-24 bg-[#AFCDF5]/5 rounded-bl-[80px] -z-10" />
                
-               <div className="space-y-8">
+               <div className="space-y-5">
                   <div className="flex items-start justify-between">
-                     <div className="space-y-1">
+                     <div className="space-y-0.5">
                         <p className="text-[10px] font-black text-[#5A7FB2] uppercase tracking-[0.4em]">Digital Access</p>
                         <h3 className="text-2xl font-black text-[#24344D] uppercase tracking-tighter">QR MEMORY CARD</h3>
                      </div>
@@ -149,13 +217,17 @@ export default function PreviewPage() {
                      </div>
                   </div>
 
-                  <div className="p-8 bg-[#FAF8F4] rounded-[32px] border border-[#24344D]/5 flex flex-col items-center gap-6 shadow-inner group">
+                  <div className="p-5 bg-[#FAF8F4] rounded-[24px] border border-[#24344D]/5 flex flex-col items-center gap-4 shadow-inner group">
                      <div className="relative">
                         {/* Placeholder QR Code */}
-                        <div className="w-40 h-40 bg-white p-4 rounded-3xl shadow-lg border border-[#24344D]/5 flex items-center justify-center relative overflow-hidden">
-                           <div className="w-full h-full bg-[url('https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https://northvows-photobooth.vercel.app')] bg-contain opacity-80" />
+                        <div className="w-32 h-32 bg-white p-3 rounded-2xl shadow-lg border border-[#24344D]/5 flex items-center justify-center relative overflow-hidden">
+                           <img 
+                             src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent('https://northvows-photobooth.vercel.app')}`} 
+                             className="w-full h-full object-contain opacity-80" 
+                             alt="Memory QR"
+                           />
                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 backdrop-blur-sm">
-                              <Smartphone className="text-[#5A7FB2] animate-bounce" />
+                              <Smartphone size={20} className="text-[#5A7FB2] animate-bounce" />
                            </div>
                         </div>
                         {/* Decorative corners */}
@@ -171,12 +243,12 @@ export default function PreviewPage() {
                      </div>
                   </div>
 
-                  <div className="space-y-4">
-                     <div className="flex items-center gap-3 p-4 bg-[#AFCDF5]/5 rounded-2xl border border-[#AFCDF5]/10">
-                        <CheckCircle2 size={16} className="text-[#5A7FB2]" />
+                  <div className="space-y-3">
+                     <div className="flex items-center gap-2.5 p-3 bg-[#AFCDF5]/5 rounded-xl border border-[#AFCDF5]/10">
+                        <CheckCircle2 size={14} className="text-[#5A7FB2]" />
                         <div>
-                           <p className="text-[10px] font-black text-[#24344D] uppercase tracking-widest">High Quality Ready</p>
-                           <p className="text-[9px] text-[#5A7FB2]/60">Your photo strip is processed in 4K resolution.</p>
+                           <p className="text-[9px] font-black text-[#24344D] uppercase tracking-widest">High Quality Ready</p>
+                           <p className="text-[8px] text-[#5A7FB2]/60">Processed in 4K resolution.</p>
                         </div>
                      </div>
                   </div>
@@ -190,25 +262,35 @@ export default function PreviewPage() {
               transition={{ duration: 1, delay: 0.6 }}
               className="flex flex-col gap-4"
             >
-               <button className="w-full py-5 bg-[#24344D] text-white rounded-[24px] flex items-center justify-center gap-3 shadow-xl hover:bg-[#24344D]/90 transition-all group overflow-hidden relative">
+               <button 
+                  onClick={handleDownload}
+                  disabled={isDownloading}
+                  className="w-full py-3.5 bg-[#24344D] text-white rounded-[18px] flex items-center justify-center gap-3 shadow-xl hover:bg-[#24344D]/90 transition-all group overflow-hidden relative disabled:opacity-50"
+               >
                   <motion.div 
                     initial={{ x: '-100%' }}
-                    whileHover={{ x: '200%' }}
+                    whileHover={!isDownloading ? { x: '200%' } : {}}
                     className="absolute inset-0 bg-white/10 -skew-x-12 transition-all duration-700"
                   />
-                  <Download size={18} />
-                  <span className="text-xs font-black uppercase tracking-[0.3em] relative z-10">Download Photo Strip</span>
+                  {isDownloading ? (
+                    <RefreshCcw size={16} className="animate-spin" />
+                  ) : (
+                    <Download size={16} />
+                  )}
+                  <span className="text-[11px] font-black uppercase tracking-[0.3em] relative z-10">
+                    {isDownloading ? 'Downloading...' : 'Download Photo Strip'}
+                  </span>
                </button>
 
-               <div className="grid grid-cols-2 gap-4">
-                  <button className="py-4 bg-white text-[#24344D] border border-[#24344D]/5 rounded-[24px] flex items-center justify-center gap-2 shadow-sm hover:shadow-md transition-all">
-                     <Share2 size={16} />
-                     <span className="text-[10px] font-black uppercase tracking-widest">Share</span>
+               <div className="grid grid-cols-2 gap-3">
+                  <button className="py-2.5 bg-white text-[#24344D] border border-[#24344D]/5 rounded-[18px] flex items-center justify-center gap-2 shadow-sm hover:shadow-md transition-all text-[9px] font-black uppercase tracking-widest">
+                     <Share2 size={14} />
+                     Share
                   </button>
                   <Link href="/photobooth" className="w-full">
-                     <button className="w-full py-4 bg-white text-[#5A7FB2] border border-[#AFCDF5]/20 rounded-[24px] flex items-center justify-center gap-2 shadow-sm hover:shadow-md transition-all">
-                        <RefreshCcw size={16} />
-                        <span className="text-[10px] font-black uppercase tracking-widest">New Session</span>
+                     <button className="w-full py-2.5 bg-white text-[#5A7FB2] border border-[#AFCDF5]/20 rounded-[18px] flex items-center justify-center gap-2 shadow-sm hover:shadow-md transition-all text-[9px] font-black uppercase tracking-widest">
+                        <RefreshCcw size={14} />
+                        New Session
                      </button>
                   </Link>
                </div>
@@ -216,18 +298,6 @@ export default function PreviewPage() {
          </div>
       </div>
 
-      {/* Floating Home Button */}
-      <div className="fixed bottom-8 right-8 z-[100]">
-         <Link href="/">
-            <motion.button
-              whileHover={{ scale: 1.1, rotate: 5 }}
-              whileTap={{ scale: 0.9 }}
-              className="w-14 h-14 bg-white text-[#24344D] rounded-full shadow-2xl flex items-center justify-center border border-[#24344D]/5 backdrop-blur-md"
-            >
-               <Home size={20} />
-            </motion.button>
-         </Link>
-      </div>
 
       <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100;300;400;500;700;900&family=Playfair+Display:ital,wght@1,400;1,700&display=swap');

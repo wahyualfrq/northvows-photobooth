@@ -189,13 +189,13 @@ export default function ResultPage() {
     setGenerationProgress(0);
     setGenerationStep(0);
 
-    // Simulated generation process
+    // Simulated generation process - Exactly 6 seconds total
     for (let i = 0; i <= 100; i += 2) {
       setGenerationProgress(i);
       if (i === 25) setGenerationStep(1);
       if (i === 50) setGenerationStep(2);
       if (i === 75) setGenerationStep(3);
-      await new Promise(resolve => setTimeout(resolve, 80));
+      await new Promise(resolve => setTimeout(resolve, 120));
     }
 
     // Smooth transition to preview page
@@ -228,14 +228,38 @@ export default function ResultPage() {
   };
 
   useEffect(() => {
-    const savedPhotos = localStorage.getItem('northvows_captured_photos');
-    const savedLayout = localStorage.getItem('northvows_selected_layout');
-    
-    if (savedPhotos) setCapturedPhotos(JSON.parse(savedPhotos));
-    if (savedLayout) setSelectedLayout(JSON.parse(savedLayout));
-    
-    if (!savedPhotos) {
-       router.replace('/photobooth');
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('northvows_selected_frame', selectedFrame.id);
+      localStorage.setItem('northvows_selected_layout', JSON.stringify(selectedLayout));
+    }
+  }, [selectedFrame, selectedLayout]);
+
+  useEffect(() => {
+    try {
+      const savedPhotos = localStorage.getItem('northvows_captured_photos');
+      const savedLayout = localStorage.getItem('northvows_selected_layout');
+      
+      if (savedPhotos) {
+        const photos = JSON.parse(savedPhotos);
+        setCapturedPhotos(photos);
+        if (photos.length === 0) router.replace('/photobooth');
+      } else {
+        router.replace('/photobooth');
+      }
+
+      if (savedLayout) {
+        try {
+          const parsed = JSON.parse(savedLayout);
+          const id = typeof parsed === 'string' ? parsed : parsed.id;
+          const layout = layouts.find(l => l.id === id);
+          if (layout) setSelectedLayout(layout);
+        } catch (e) {
+          const layout = layouts.find(l => l.id === savedLayout);
+          if (layout) setSelectedLayout(layout);
+        }
+      }
+    } catch (err) {
+      router.replace('/photobooth');
     }
   }, [router]);
 
@@ -302,7 +326,7 @@ export default function ResultPage() {
       <div className="absolute inset-0 z-0 pointer-events-none">
         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-[#AFCDF5]/10 to-transparent" />
         <div className="absolute top-[10%] -left-[10%] w-[50%] h-[50%] bg-[#AFCDF5]/15 rounded-full blur-[100px] animate-pulse" />
-        <div className="absolute inset-0 opacity-[0.02] mix-blend-overlay bg-[url('https://www.transparenttextures.com/patterns/natural-paper.png')]" />
+        <div className="absolute inset-0 opacity-[0.02] mix-blend-overlay bg-[url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E')]" />
       </div>
 
       {/* Floating Retake Button - Matched with Studio Exit Position */}
@@ -651,89 +675,172 @@ export default function ResultPage() {
          </div>
       </div>
 
-      {/* Cinematic Generation Overlay */}
+      {/* Cinematic Generation Overlay - Polaroid Printing Style */}
       <AnimatePresence>
         {isGenerating && (
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-white/40 backdrop-blur-3xl overflow-hidden"
+            className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-[#FAF8F4] overflow-hidden"
           >
-            {/* Aesthetic Background Elements */}
+            {/* Aesthetic Background Atmosphere - Dreamy Denim Sky */}
             <div className="absolute inset-0 pointer-events-none">
-               {[...Array(20)].map((_, i) => (
-                 <motion.div
-                   key={i}
-                   initial={{ 
-                     x: Math.random() * 100 + "%", 
-                     y: Math.random() * 100 + "%",
-                     scale: 0,
-                     opacity: 0
-                   }}
-                   animate={{ 
-                     y: [null, "-20%"],
-                     scale: [0, 1, 0],
-                     opacity: [0, 0.5, 0]
-                   }}
-                   transition={{ 
-                     duration: Math.random() * 3 + 2,
-                     repeat: Infinity,
-                     delay: Math.random() * 2
-                   }}
-                   className="absolute w-1 h-1 bg-[#AFCDF5] rounded-full blur-[1px]"
-                 />
-               ))}
-               <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] mix-blend-overlay" />
+               {/* Base Image Background & Layered Gradients */}
+               <div className="absolute inset-0">
+                  <img src="/images/bg.webp" alt="" className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#BFD7F6]/30 via-transparent to-[#DCEBFA]/20 mix-blend-soft-light" />
+               </div>
+               
+               
+               {/* Denim-Inspired & Paper Texture Overlays */}
+               <div className="absolute inset-0 opacity-[0.05] mix-blend-multiply bg-[url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E')]" />
+               <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+
+               {/* Soft Cloud Lighting / Haze */}
+               <div className="absolute inset-0 bg-gradient-to-t from-[#FAF8F4] via-transparent to-transparent opacity-60" />
+
+               {/* Floating Aesthetic Decorative Elements */}
+               <div className="absolute inset-0 overflow-hidden">
+                  {/* Atmospheric Clouds */}
+                  <motion.div 
+                     animate={{ x: [0, 20, 0], y: [0, -10, 0] }} 
+                     transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+                     className="absolute top-[15%] left-[10%] text-[#5A7FB2]/10"
+                  >
+                     <Cloud size={120} fill="currentColor" />
+                  </motion.div>
+                  <motion.div 
+                     animate={{ x: [0, -15, 0], y: [0, 15, 0] }} 
+                     transition={{ duration: 18, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+                     className="absolute bottom-[10%] right-[15%] text-[#BFD7F6]/20"
+                  >
+                     <Cloud size={160} fill="currentColor" />
+                  </motion.div>
+
+                  {/* Scrapbook Tape & Icons */}
+                  <div className="absolute top-[12%] right-[20%] w-16 h-5 bg-[#BFD7F6]/20 -rotate-12 border border-white/30 shadow-sm" />
+                  <div className="absolute bottom-[20%] left-[10%] w-12 h-12 border border-[#5A7FB2]/10 rounded-full flex items-center justify-center -rotate-6">
+                     <Smile size={24} className="text-[#5A7FB2]/20" />
+                  </div>
+                  <div className="absolute top-[40%] left-[5%] text-[#BFD7F6]/30">
+                     <HeartIcon size={20} fill="currentColor" />
+                  </div>
+                  {/* Cinematic Drifting Particles */}
+                  {[...Array(25)].map((_, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ 
+                        x: Math.random() * 100 + "%", 
+                        y: Math.random() * 100 + "%",
+                        scale: 0,
+                        opacity: 0
+                      }}
+                      animate={{ 
+                        y: [null, "-25%"],
+                        scale: [0, 1, 0],
+                        opacity: [0, 0.4, 0]
+                      }}
+                      transition={{ 
+                        duration: Math.random() * 6 + 6,
+                        repeat: Infinity,
+                        delay: Math.random() * 5
+                      }}
+                      className="absolute w-1 h-1 bg-[#AFCDF5] rounded-full blur-[0.5px]"
+                    />
+                  ))}
+               </div>
             </div>
 
-            {/* Content Container */}
-            <motion.div 
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.2 }}
-              className="relative z-10 text-center space-y-8 max-w-md px-6"
-            >
-               <div className="space-y-3">
-                  <h2 className="text-3xl sm:text-4xl font-black text-[#24344D] tracking-tighter uppercase leading-none">
-                    GENERATING <br /> <span className="serif-italic font-normal text-[#5A7FB2] lowercase">your</span> MEMORY
+            {/* Content Section */}
+            <div className="relative z-20 flex flex-col items-center w-full max-w-4xl -translate-y-24 sm:-translate-y-32">
+               {/* Header Text */}
+               <motion.div 
+                 initial={{ opacity: 0, y: -20 }}
+                 animate={{ opacity: 1, y: 0 }}
+                 transition={{ delay: 0.3 }}
+                 className="text-center space-y-3 mb-4"
+               >
+                  <h2 className="text-3xl sm:text-4xl font-black text-[#FAF8F4] tracking-tighter uppercase leading-none drop-shadow-md">
+                    GENERATING <br /> <span className="serif-italic font-normal text-[#DCEBFA] lowercase">your</span> MEMORY
                   </h2>
-                  <p className="text-[10px] sm:text-[11px] font-bold text-[#5A7FB2]/60 uppercase tracking-[0.3em] leading-relaxed max-w-[280px] mx-auto">
+                  <p className="text-[10px] sm:text-[11px] font-bold text-[#FAF8F4]/90 uppercase tracking-[0.3em] leading-relaxed max-w-[280px] mx-auto drop-shadow-sm">
                     Please wait while we prepare your nostalgic moment.
                   </p>
-               </div>
+               </motion.div>
 
-               {/* Elegant Progress Bar */}
-               <div className="space-y-4">
-                  <div className="w-full h-[3px] bg-[#24344D]/5 rounded-full overflow-hidden">
-                     <motion.div 
-                       className="h-full bg-gradient-to-r from-[#AFCDF5] to-[#5A7FB2]"
-                       initial={{ width: 0 }}
-                       animate={{ width: `${generationProgress}%` }}
-                       transition={{ ease: "linear" }}
-                     />
-                  </div>
+               {/* MAIN VISUAL: Polaroid Machine & Printing Animation */}
+               <div className="relative flex flex-col items-center justify-center w-full h-[480px] -mt-4">
                   
-                  {/* Step Indicators */}
-                  <div className="flex flex-col items-center gap-1">
-                     <AnimatePresence mode="wait">
-                        <motion.p 
-                          key={generationStep}
-                          initial={{ opacity: 0, y: 5 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -5 }}
-                          className="text-[9px] font-black text-[#24344D] uppercase tracking-[0.4em]"
-                        >
-                           {generationSteps[generationStep]}
-                        </motion.p>
-                     </AnimatePresence>
-                     <p className="text-[10px] font-serif italic text-[#5A7FB2]">{generationProgress}%</p>
-                  </div>
-               </div>
-            </motion.div>
+                  {/* The Polaroid Assets - Printing from below */}
+                  <div className="absolute top-[200px] flex flex-col items-center pointer-events-none">
+                     {/* Frame 1 */}
+                     <motion.div
+                        initial={{ y: -80, opacity: 0, rotate: 0 }}
+                        animate={{ y: 140, opacity: 1, rotate: -2 }}
+                        transition={{ 
+                           delay: 1.0,
+                           duration: 3,
+                           ease: [0.22, 1, 0.36, 1]
+                        }}
+                        className="absolute w-40 sm:w-52 aspect-[3/4] bg-white p-2 sm:p-3 pb-8 sm:pb-12 rounded-sm shadow-[0_10px_30px_rgba(0,0,0,0.08)] border border-white/50"
+                     >
+                        <div className="w-full h-full bg-[#FAF8F4] overflow-hidden rounded-[1px] shadow-inner">
+                           <img src={capturedPhotos[0]} className="w-full h-full object-cover grayscale-[0.2] brightness-110" />
+                        </div>
+                     </motion.div>
 
-            {/* Soft Glow */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#AFCDF5]/20 rounded-full blur-[120px] -z-10" />
+                     {/* Frame 2 */}
+                     <motion.div
+                        initial={{ y: -80, opacity: 0, rotate: 0 }}
+                        animate={{ y: 90, opacity: 1, rotate: 1 }}
+                        transition={{ 
+                           delay: 3.0,
+                           duration: 3,
+                           ease: [0.22, 1, 0.36, 1]
+                        }}
+                        className="absolute w-40 sm:w-52 aspect-[3/4] bg-white p-2 sm:p-3 pb-8 sm:pb-12 rounded-sm shadow-[0_10px_30px_rgba(0,0,0,0.1)] border border-white/50"
+                     >
+                        <div className="w-full h-full bg-[#FAF8F4] overflow-hidden rounded-[1px] shadow-inner">
+                           <img src={capturedPhotos[1] || capturedPhotos[0]} className="w-full h-full object-cover grayscale-[0.2] brightness-110" />
+                        </div>
+                     </motion.div>
+
+                     {/* Frame 3 */}
+                     <motion.div
+                        initial={{ y: -80, opacity: 0, rotate: 0 }}
+                        animate={{ y: 40, opacity: 1, rotate: -1 }}
+                        transition={{ 
+                           delay: 5.0,
+                           duration: 3,
+                           ease: [0.22, 1, 0.36, 1]
+                        }}
+                        className="absolute w-40 sm:w-52 aspect-[3/4] bg-white p-2 sm:p-3 pb-8 sm:pb-12 rounded-sm shadow-[0_15px_40px_rgba(0,0,0,0.12)] border border-white/50"
+                     >
+                        <div className="w-full h-full bg-[#FAF8F4] overflow-hidden rounded-[1px] shadow-inner">
+                           <img src={capturedPhotos[2] || capturedPhotos[0]} className="w-full h-full object-cover grayscale-[0.2] brightness-110" />
+                        </div>
+                     </motion.div>
+                  </div>
+
+                  {/* The Camera Asset - CENTER & TOP LAYER */}
+                  <motion.div
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="relative z-50 w-80 sm:w-[480px] h-80 sm:h-[480px] flex items-center justify-center"
+                  >
+                     <img 
+                        src="/images/polaroid.webp" 
+                        alt="Polaroid Machine" 
+                        className="w-full h-full object-contain filter drop-shadow-[0_20px_50px_rgba(0,0,0,0.1)]"
+                     />
+                  </motion.div>
+               </div>
+
+            </div>
+
+            {/* Soft Ambient Vignette */}
+            <div className="absolute inset-0 pointer-events-none shadow-[inset_0_0_150px_rgba(0,0,0,0.03)]" />
           </motion.div>
         )}
       </AnimatePresence>
