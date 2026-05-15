@@ -606,7 +606,11 @@ export default function ResultPage() {
                           <div className="flex gap-2">
                              {STICKER_ITEMS.map(item => (
                                <button key={item.id} onClick={() => addSticker(item)} className="flex-shrink-0 w-10 h-10 bg-white/80 backdrop-blur-sm rounded-xl border border-white shadow-sm flex items-center justify-center text-xl active:scale-95 transition-all">
-                                  {item.content}
+                                  {typeof item.content === 'string' && item.content.startsWith('/images/') ? (
+                                    <img src={item.content} alt="" className="w-full h-full object-contain p-1.5" />
+                                  ) : (
+                                    item.content
+                                  )}
                                </button>
                              ))}
                           </div>
