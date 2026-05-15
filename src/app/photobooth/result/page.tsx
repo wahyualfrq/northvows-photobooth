@@ -173,6 +173,59 @@ export default function ResultPage() {
   const [stickers, setStickers] = useState<StickerInstance[]>([]);
   const [history, setHistory] = useState<StickerInstance[][]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generationProgress, setGenerationProgress] = useState(0);
+  const [generationStep, setGenerationStep] = useState(0);
+
+  const generationSteps = [
+    "Rendering your photos...",
+    "Generating animated GIF...",
+    "Preparing QR memory access...",
+    "Saving digital memoir..."
+  ];
+
+  const handleStartGeneration = async () => {
+    setIsGenerating(true);
+    setGenerationProgress(0);
+    setGenerationStep(0);
+
+    // Simulated generation process
+    for (let i = 0; i <= 100; i += 2) {
+      setGenerationProgress(i);
+      if (i === 25) setGenerationStep(1);
+      if (i === 50) setGenerationStep(2);
+      if (i === 75) setGenerationStep(3);
+      await new Promise(resolve => setTimeout(resolve, 80));
+    }
+
+    // Smooth transition to preview page
+    setTimeout(() => {
+      router.push('/photobooth/preview');
+    }, 500);
+  };
+
+  const handleDownload = async () => {
+    // Keep this for actual download action if needed later
+    const element = document.getElementById('scrapbook-workspace-content');
+    if (!element) return;
+    
+    setIsGenerating(true);
+    try {
+      const dataUrl = await toPng(element, { 
+        quality: 1,
+        pixelRatio: 2,
+        backgroundColor: '#FAF8F4'
+      });
+      const link = document.createElement('a');
+      link.download = `northvows-memoir-${Date.now()}.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch (err) {
+      console.error('Download failed:', err);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   useEffect(() => {
     const savedPhotos = localStorage.getItem('northvows_captured_photos');
@@ -240,30 +293,6 @@ export default function ResultPage() {
     pushToHistory([...stickers, newSticker]);
   };
 
-  const handleDownload = async () => {
-    const element = document.getElementById('scrapbook-workspace-content');
-    if (!element) return;
-
-    try {
-      setIsDownloading(true);
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      const dataUrl = await toPng(element, {
-        quality: 1,
-        pixelRatio: 3,
-        cacheBust: true,
-      });
-
-      const link = document.createElement('a');
-      link.download = `northvows-memoir-${new Date().getTime()}.png`;
-      link.href = dataUrl;
-      link.click();
-    } catch (err) {
-      console.error('Download failed:', err);
-    } finally {
-      setIsDownloading(false);
-    }
-  };
 
   if (capturedPhotos.length === 0) return null;
 
@@ -596,21 +625,118 @@ export default function ResultPage() {
                   </button>
                </div>
                <motion.button
-                 whileHover={{ scale: 1.02 }}
-                 whileTap={{ scale: 0.98 }}
-                 onClick={handleDownload}
-                 disabled={isDownloading}
-                 className={cn(
-                   "flex items-center gap-2 px-6 py-3 bg-gradient-to-br from-[#AFCDF5] to-[#5A7FB2] text-white rounded-full text-[9px] font-black uppercase tracking-[0.2em] shadow-lg transition-all",
-                   isDownloading && "opacity-80 cursor-wait"
-                 )}
-               >
-                 {isDownloading ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />}
-                 Save Changes
-               </motion.button>
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleStartGeneration}
+                  disabled={isGenerating}
+                  className={cn(
+                    "flex items-center gap-2 px-6 py-3 bg-gradient-to-br from-[#AFCDF5] to-[#5A7FB2] text-white rounded-full text-[9px] font-black uppercase tracking-[0.2em] shadow-lg transition-all relative overflow-hidden",
+                    isGenerating && "opacity-90 cursor-wait"
+                  )}
+                >
+                  {isGenerating ? (
+                    <>
+                       <div className="absolute inset-0 bg-white/20 animate-shimmer" />
+                       <Loader2 size={12} className="animate-spin relative z-10" />
+                       <span className="relative z-10">Preparing...</span>
+                    </>
+                  ) : (
+                    <>
+                       <Download size={12} />
+                       Save Changes
+                    </>
+                  )}
+                </motion.button>
             </div>
          </div>
       </div>
+
+      {/* Cinematic Generation Overlay */}
+      <AnimatePresence>
+        {isGenerating && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-white/40 backdrop-blur-3xl overflow-hidden"
+          >
+            {/* Aesthetic Background Elements */}
+            <div className="absolute inset-0 pointer-events-none">
+               {[...Array(20)].map((_, i) => (
+                 <motion.div
+                   key={i}
+                   initial={{ 
+                     x: Math.random() * 100 + "%", 
+                     y: Math.random() * 100 + "%",
+                     scale: 0,
+                     opacity: 0
+                   }}
+                   animate={{ 
+                     y: [null, "-20%"],
+                     scale: [0, 1, 0],
+                     opacity: [0, 0.5, 0]
+                   }}
+                   transition={{ 
+                     duration: Math.random() * 3 + 2,
+                     repeat: Infinity,
+                     delay: Math.random() * 2
+                   }}
+                   className="absolute w-1 h-1 bg-[#AFCDF5] rounded-full blur-[1px]"
+                 />
+               ))}
+               <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] mix-blend-overlay" />
+            </div>
+
+            {/* Content Container */}
+            <motion.div 
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              className="relative z-10 text-center space-y-8 max-w-md px-6"
+            >
+               <div className="space-y-3">
+                  <h2 className="text-3xl sm:text-4xl font-black text-[#24344D] tracking-tighter uppercase leading-none">
+                    GENERATING <br /> <span className="serif-italic font-normal text-[#5A7FB2] lowercase">your</span> MEMORY
+                  </h2>
+                  <p className="text-[10px] sm:text-[11px] font-bold text-[#5A7FB2]/60 uppercase tracking-[0.3em] leading-relaxed max-w-[280px] mx-auto">
+                    Please wait while we prepare your nostalgic moment.
+                  </p>
+               </div>
+
+               {/* Elegant Progress Bar */}
+               <div className="space-y-4">
+                  <div className="w-full h-[3px] bg-[#24344D]/5 rounded-full overflow-hidden">
+                     <motion.div 
+                       className="h-full bg-gradient-to-r from-[#AFCDF5] to-[#5A7FB2]"
+                       initial={{ width: 0 }}
+                       animate={{ width: `${generationProgress}%` }}
+                       transition={{ ease: "linear" }}
+                     />
+                  </div>
+                  
+                  {/* Step Indicators */}
+                  <div className="flex flex-col items-center gap-1">
+                     <AnimatePresence mode="wait">
+                        <motion.p 
+                          key={generationStep}
+                          initial={{ opacity: 0, y: 5 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -5 }}
+                          className="text-[9px] font-black text-[#24344D] uppercase tracking-[0.4em]"
+                        >
+                           {generationSteps[generationStep]}
+                        </motion.p>
+                     </AnimatePresence>
+                     <p className="text-[10px] font-serif italic text-[#5A7FB2]">{generationProgress}%</p>
+                  </div>
+               </div>
+            </motion.div>
+
+            {/* Soft Glow */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#AFCDF5]/20 rounded-full blur-[120px] -z-10" />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </main>
   );
 }
