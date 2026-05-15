@@ -144,8 +144,8 @@ export default function PreviewPage() {
          </div>
       </div>
 
-      {/* Header Section */}
-      <div className="max-w-[1400px] mx-auto px-6 pt-20 pb-6 text-center space-y-2">
+      {/* Header Section - Increased padding for notch clearance */}
+      <div className="max-w-[1400px] mx-auto px-6 pt-24 sm:pt-28 pb-6 text-center space-y-2">
          <motion.div
            initial={{ opacity: 0, y: 20 }}
            animate={{ opacity: 1, y: 0 }}
@@ -176,14 +176,14 @@ export default function PreviewPage() {
                   {/* Photo Strip (The Static Memoir) */}
                   <div className="flex flex-col items-center w-full max-w-[280px]">
                      <h3 className="text-[10px] font-black text-[#24344D]/30 uppercase tracking-[0.5em] mb-6">Printed Strip</h3>
-                     <div id="photo-strip-element" className="relative bg-white sm:bg-transparent p-4 sm:p-0 flex flex-col items-center">
+                     <div id="photo-strip-element" className="relative flex flex-col items-center">
                        <div className="relative w-fit">
                          {finalMemoir ? (
                            <motion.img 
                              initial={{ opacity: 0 }}
                              animate={{ opacity: 1 }}
                              src={finalMemoir} 
-                             className="w-full h-auto shadow-2xl rounded-sm"
+                             className="w-full h-auto rounded-sm"
                              alt="Final Memoir" 
                            />
                          ) : (

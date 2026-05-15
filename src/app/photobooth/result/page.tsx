@@ -57,11 +57,12 @@ const TEXT_STAMPS = [
   { id: 'text-3', type: 'text', content: 'Our moment, forever' },
 ];
 
-function DraggableSticker({ sticker, updateStickerNoHistory, pushToHistory, stickers }: { 
+function DraggableSticker({ sticker, updateStickerNoHistory, pushToHistory, stickers, isGenerating }: { 
   sticker: StickerInstance, 
   updateStickerNoHistory: (id: string, updates: Partial<StickerInstance>) => void,
   pushToHistory: (stickers: StickerInstance[]) => void,
-  stickers: StickerInstance[]
+  stickers: StickerInstance[],
+  isGenerating: boolean
 }) {
   const controls = useDragControls();
 
@@ -110,8 +111,9 @@ function DraggableSticker({ sticker, updateStickerNoHistory, pushToHistory, stic
         )}
       </div>
 
-      {/* Bounding Box Transformation UI - Only visible on hover */}
-      <div className="absolute -inset-2 border-2 border-[#AFCDF5] opacity-100 lg:opacity-0 lg:group-hover/sticker:opacity-100 transition-opacity pointer-events-none rounded-sm">
+      {/* Bounding Box Transformation UI - Only visible on hover and NOT during generation */}
+      {!isGenerating && (
+        <div className="absolute -inset-2 border-2 border-[#AFCDF5] opacity-100 lg:opacity-0 lg:group-hover/sticker:opacity-100 transition-opacity pointer-events-none rounded-sm">
          {/* Corner Resize Handles */}
          <motion.div 
            drag
@@ -156,6 +158,7 @@ function DraggableSticker({ sticker, updateStickerNoHistory, pushToHistory, stic
             <Scissors size={14} />
          </button>
       </div>
+      )}
     </motion.div>
   );
 }
@@ -176,6 +179,7 @@ export default function ResultPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationProgress, setGenerationProgress] = useState(0);
   const [generationStep, setGenerationStep] = useState(0);
+  const [mounted, setMounted] = useState(false);
 
   const generationSteps = [
     "Rendering your photos...",
@@ -189,13 +193,22 @@ export default function ResultPage() {
     setGenerationProgress(0);
     setGenerationStep(0);
 
+    // Give a short delay to ensure React has rendered the UI without handles
+    await new Promise(resolve => setTimeout(resolve, 100));
+
     // Capture the final memoir "Truly" - This bakes everything into one image
-    const element = document.getElementById('scrapbook-workspace-content');
+    const element = document.getElementById('final-memoir-capture');
     if (element) {
       try {
         const dataUrl = await toPng(element, { 
-          pixelRatio: 1.5, // Balance between quality and localStorage limit (5MB)
-          backgroundColor: '#FAF8F4',
+          pixelRatio: 2.5, // High quality
+          backgroundColor: 'transparent', // Ensure no background is captured
+          style: {
+            transform: 'none', // Remove any scale transforms
+            boxShadow: 'none', // Remove shadows that create extra space
+            margin: '0',
+            padding: '0'
+          },
           cacheBust: true
         });
         localStorage.setItem('northvows_final_memoir', dataUrl);
@@ -257,6 +270,7 @@ export default function ResultPage() {
   }, [selectedFrame, selectedLayout]);
 
   useEffect(() => {
+    setMounted(true);
     try {
       const savedPhotos = localStorage.getItem('northvows_captured_photos');
       const savedLayout = localStorage.getItem('northvows_selected_layout');
@@ -284,6 +298,8 @@ export default function ResultPage() {
       router.replace('/photobooth');
     }
   }, [router]);
+  
+  if (!mounted) return null;
 
   // History management
   const pushToHistory = (newStickers: StickerInstance[]) => {
@@ -508,7 +524,7 @@ export default function ResultPage() {
            <div id="scrapbook-workspace-content" className="relative p-12 sm:p-16 flex flex-col items-center scale-[0.75] sm:scale-90 lg:scale-100 origin-center">
               <div className="absolute top-12 left-1/2 -translate-x-1/2 w-40 h-12 bg-white/20 backdrop-blur-sm border border-white/10 rotate-[-1deg] -z-10 shadow-sm" />
               
-              <div className="relative group lg:scale-[1.15] origin-center transition-transform duration-500">
+              <div id="final-memoir-capture" className="relative group lg:scale-[1.15] origin-center transition-transform duration-500">
                  <div className="relative shadow-[0_40px_80px_-15px_rgba(36,52,77,0.3)]">
                    <PhotoStripPreview 
                       photos={capturedPhotos} 
@@ -525,6 +541,7 @@ export default function ResultPage() {
                         updateStickerNoHistory={updateStickerNoHistory}
                         pushToHistory={pushToHistory}
                         stickers={stickers}
+                        isGenerating={isGenerating}
                       />
                     ))}
                  </AnimatePresence>
@@ -775,13 +792,14 @@ export default function ResultPage() {
             </div>
 
             {/* Content Section */}
-            <div className="relative z-20 flex flex-col items-center w-full max-w-4xl -translate-y-24 sm:-translate-y-32">
+            {/* Content Section - Adjusted for notch clearance & higher position */}
+            <div className="relative z-20 flex flex-col items-center w-full max-w-4xl -translate-y-20 sm:-translate-y-28 pt-12 sm:pt-0">
                {/* Header Text */}
                <motion.div 
                  initial={{ opacity: 0, y: -20 }}
                  animate={{ opacity: 1, y: 0 }}
                  transition={{ delay: 0.3 }}
-                 className="text-center space-y-3 mb-4"
+                 className="text-center space-y-3 mb-0"
                >
                   <h2 className="text-3xl sm:text-4xl font-black text-[#FAF8F4] tracking-tighter uppercase leading-none drop-shadow-md">
                     GENERATING <br /> <span className="serif-italic font-normal text-[#DCEBFA] lowercase">your</span> MEMORY
@@ -792,7 +810,7 @@ export default function ResultPage() {
                </motion.div>
 
                {/* MAIN VISUAL: Polaroid Machine & Printing Animation */}
-               <div className="relative flex flex-col items-center justify-center w-full h-[480px] -mt-4">
+               <div className="relative flex flex-col items-center justify-center w-full h-[480px] -mt-20">
                   
                   {/* The Polaroid Assets - Printing from below */}
                   <div className="absolute top-[200px] flex flex-col items-center pointer-events-none">
