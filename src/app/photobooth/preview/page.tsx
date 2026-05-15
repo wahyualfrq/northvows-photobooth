@@ -172,13 +172,14 @@ export default function PreviewPage() {
                   {/* Photo Strip (The Static Memoir) */}
                   <div className="flex flex-col items-center w-full max-w-[280px]">
                      <h3 className="text-[10px] font-black text-[#24344D]/30 uppercase tracking-[0.5em] mb-6">Printed Strip</h3>
-                     <div id="photo-strip-element" className="relative w-full bg-white sm:bg-transparent p-4 sm:p-0">
-                        <PhotoStripPreview 
-                           photos={photos} 
-                           frame={selectedFrame} 
-                           layout={selectedLayout} 
-                        />
-                        {/* Static Stickers for Preview */}
+                     <div id="photo-strip-element" className="relative bg-white sm:bg-transparent p-4 sm:p-0 flex flex-col items-center">
+                       <div className="relative w-fit">
+                         <PhotoStripPreview 
+                            photos={photos} 
+                            frame={selectedFrame} 
+                            layout={selectedLayout} 
+                         />
+                         {/* Static Stickers for Preview - Relative to the strip itself */}
                         {stickers.map((sticker) => (
                           <div
                             key={sticker.id}
@@ -218,6 +219,7 @@ export default function PreviewPage() {
                             )}
                           </div>
                         ))}
+                       </div>
                      </div>
                   </div>
 
