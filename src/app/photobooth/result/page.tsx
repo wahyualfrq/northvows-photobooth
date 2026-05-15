@@ -189,20 +189,35 @@ export default function ResultPage() {
     setGenerationProgress(0);
     setGenerationStep(0);
 
-    // Save stickers and state to localStorage for persistence
+    // Capture the final memoir "Truly" - This bakes everything into one image
+    const element = document.getElementById('scrapbook-workspace-content');
+    if (element) {
+      try {
+        const dataUrl = await toPng(element, { 
+          pixelRatio: 1.5, // Balance between quality and localStorage limit (5MB)
+          backgroundColor: '#FAF8F4',
+          cacheBust: true
+        });
+        localStorage.setItem('northvows_final_memoir', dataUrl);
+      } catch (err) {
+        console.error('Failed to capture memoir:', err);
+      }
+    }
+
+    // Save state for fallback
     if (typeof window !== 'undefined') {
       localStorage.setItem('northvows_stickers', JSON.stringify(stickers));
       localStorage.setItem('northvows_selected_frame', JSON.stringify(selectedFrame));
       localStorage.setItem('northvows_selected_layout', JSON.stringify(selectedLayout));
     }
 
-    // Simulated generation process - Exactly 6 seconds total
+    // Simulated generation process - Exactly 7 seconds total
     for (let i = 0; i <= 100; i += 2) {
       setGenerationProgress(i);
       if (i === 25) setGenerationStep(1);
       if (i === 50) setGenerationStep(2);
       if (i === 75) setGenerationStep(3);
-      await new Promise(resolve => setTimeout(resolve, 60)); // Faster for better UX but still atmospheric
+      await new Promise(resolve => setTimeout(resolve, 140)); // 140ms * 50 steps = 7000ms
     }
 
     // Smooth transition to preview page
