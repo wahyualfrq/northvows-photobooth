@@ -58,52 +58,59 @@ export default function FrameSelector({
               </div>
 
               <div className={cn(
-                "w-full scrapbook-card p-2 sm:p-3 transition-all duration-500 rounded-sm relative overflow-hidden",
+                "w-full scrapbook-card transition-all duration-500 rounded-sm relative overflow-hidden flex flex-col",
+                frame.type === 'color' ? "p-2 sm:p-3" : "p-0", // No padding for overlays
                 selectedFrame.id === frame.id 
                   ? "ring-2 ring-[#5A7FB2] shadow-2xl shadow-[#5A7FB2]/10" 
                   : "hover:shadow-xl border border-white/60"
               )}
               style={{
-                 aspectRatio: `${selectedLayout.cols} / ${selectedLayout.rows + 0.5}`
+                 aspectRatio: frame.type === 'overlay' ? '2 / 3' : `${selectedLayout.cols} / ${selectedLayout.rows + 0.5}`,
+                 backgroundColor: frame.type === 'color' ? (
+                   frame.id === 'vintage-blue' ? '#AFCDF5' : 
+                   frame.id === 'denim-memories' ? '#5A7FB2' : 
+                   frame.id === 'soft-cloud' ? '#DCEBFA' : 
+                   frame.id === 'cream-diary' ? '#F2EEE7' : 
+                   frame.id === 'school-memoir' ? '#EAE0D5' :
+                   frame.id === 'night-sky' ? '#1A1A2E' :
+                   frame.id === 'bestie' ? '#FFD1DC' :
+                   frame.id === 'playful-stars' ? '#E0F2F1' : '#FFFFFF'
+                 ) : '#FFFFFF'
               }}
               >
-                {/* Layout Visualization Overlay on Frame */}
-                <div className="w-full h-full flex flex-col gap-2">
-                  <div 
-                    className="grid gap-1.5 w-full flex-1"
-                    style={{
-                      gridTemplateRows: `repeat(${selectedLayout.rows}, minmax(0, 1fr))`,
-                      gridTemplateColumns: `repeat(${selectedLayout.cols}, minmax(0, 1fr))`,
-                    }}
-                  >
-                    {Array.from({ length: selectedLayout.rows * selectedLayout.cols }).map((_, i) => (
+                {/* Visual Preview Content */}
+                <div className="relative w-full h-full flex flex-col z-10">
+                  {frame.type === 'overlay' && frame.overlayImage ? (
+                    <div className="absolute inset-0 z-0">
+                       <img src={frame.overlayImage} alt="" className="w-full h-full object-fill" />
+                    </div>
+                  ) : (
+                    <div className="p-2 sm:p-3 h-full flex flex-col gap-2">
                       <div 
-                        key={i} 
-                        className={cn(
-                          "transition-colors duration-500 rounded-[1px]",
-                          frame.theme === 'dark' ? "bg-[#24344D]/10" : "bg-white/60"
-                        )}
+                        className="grid gap-1 w-full flex-1"
                         style={{
-                          backgroundColor: frame.id === 'denim-memories' ? 'rgba(90, 127, 178, 0.1)' : undefined
+                          gridTemplateRows: `repeat(${selectedLayout.rows}, minmax(0, 1fr))`,
+                          gridTemplateColumns: `repeat(${selectedLayout.cols}, minmax(0, 1fr))`,
                         }}
-                      />
-                    ))}
-                  </div>
+                      >
+                        {Array.from({ length: selectedLayout.rows * selectedLayout.cols }).map((_, i) => (
+                          <div 
+                            key={i} 
+                            className={cn(
+                              "transition-colors duration-500 rounded-[1px]",
+                              frame.theme === 'dark' ? "bg-[#24344D]/10" : "bg-white/60"
+                            )}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
                   
-                  {/* Frame Branding Detail */}
-                  <div className="flex items-center justify-center pt-2">
-                     <span className={cn(
-                       "text-[7px] font-black tracking-[0.3em] uppercase opacity-40",
-                       frame.theme === 'dark' ? "text-[#24344D]" : "text-secondary"
-                     )}>
-                       {frame.name} Collection
-                     </span>
-                  </div>
                 </div>
 
                 {/* Selected State Overlay */}
                 {selectedFrame.id === frame.id && (
-                  <div className="absolute top-2 right-2 w-6 h-6 bg-[#5A7FB2] rounded-full flex items-center justify-center text-white shadow-lg">
+                  <div className="absolute top-2 right-2 w-6 h-6 bg-[#5A7FB2] rounded-full flex items-center justify-center text-white shadow-lg z-30">
                     <Check size={14} strokeWidth={4} />
                   </div>
                 )}
@@ -129,7 +136,7 @@ export default function FrameSelector({
       <div className="flex items-center justify-center gap-4 mt-2">
         <div className="px-3 py-1 bg-secondary/10 rounded-full border border-secondary/5">
           <span className="text-[8px] font-black uppercase tracking-widest text-secondary flex items-center gap-2">
-            Compatible with: <span className="text-foreground">{selectedLayout.name}</span>
+            Compatible with: <span className="text-foreground">{selectedFrame.layoutId || selectedLayout.name}</span>
           </span>
         </div>
       </div>

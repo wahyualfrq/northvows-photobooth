@@ -42,6 +42,9 @@ const STICKER_ITEMS = [
   { id: 'stick-3', type: 'sticker', content: '🌸', label: 'Flower' },
   { id: 'stick-4', type: 'sticker', content: '📷', label: 'Camera' },
   { id: 'stick-5', type: 'sticker', content: '🤍', label: 'Heart' },
+  { id: 'stick-jam', type: 'sticker', content: '/images/stample/jam1.webp', label: 'Clock' },
+  { id: 'stick-kupu', type: 'sticker', content: '/images/stample/kupu2.webp', label: 'Butterfly' },
+  { id: 'stick-star', type: 'sticker', content: '/images/stample/starstample.webp', label: 'Star Stamp' },
 ];
 
 const DOODLE_ITEMS = [
@@ -57,22 +60,24 @@ const TEXT_STAMPS = [
   { id: 'text-3', type: 'text', content: 'Our moment, forever' },
 ];
 
-function DraggableSticker({ sticker, updateStickerNoHistory, pushToHistory, stickers, isGenerating }: { 
+function DraggableSticker({ sticker, updateStickerNoHistory, pushToHistory, setStickers, stickers, isGenerating }: { 
   sticker: StickerInstance, 
   updateStickerNoHistory: (id: string, updates: Partial<StickerInstance>) => void,
   pushToHistory: (stickers: StickerInstance[]) => void,
+  setStickers: React.Dispatch<React.SetStateAction<StickerInstance[]>>,
   stickers: StickerInstance[],
   isGenerating: boolean
 }) {
-  const controls = useDragControls();
-
   return (
     <motion.div
       drag
-      dragControls={controls}
-      dragListener={false}
       dragMomentum={false}
-      onDragEnd={() => pushToHistory(stickers)}
+      onDragEnd={(_, info) => {
+        const newX = sticker.x + (info.offset.x / window.innerWidth) * 100;
+        const newY = sticker.y + (info.offset.y / window.innerHeight) * 100;
+        const newStickers = stickers.map(s => s.id === sticker.id ? { ...s, x: newX, y: newY } : s);
+        pushToHistory(newStickers);
+      }}
       initial={{ scale: 0, rotate: sticker.rotation }}
       animate={{ scale: sticker.scale, rotate: sticker.rotation }}
       exit={{ scale: 0 }}
@@ -82,82 +87,90 @@ function DraggableSticker({ sticker, updateStickerNoHistory, pushToHistory, stic
          left: `${sticker.x}%`, 
          top: `${sticker.y}%`,
          cursor: 'grab',
-         zIndex: 50
+         zIndex: 100
       }}
       className="group/sticker"
     >
-      <div 
-        onPointerDown={(e) => controls.start(e)}
-        className="cursor-grab active:cursor-grabbing"
-      >
+      <div className="cursor-grab active:cursor-grabbing">
+        {sticker.type === 'sticker' && (
+          <>
+            {typeof sticker.content === 'string' && sticker.content.startsWith('/images/') ? (
+              <img src={sticker.content} alt="Sticker" className="w-20 h-auto filter drop-shadow-2xl select-none pointer-events-none" />
+            ) : (
+              <span className="text-5xl filter drop-shadow-2xl select-none pointer-events-none">{sticker.content}</span>
+            )}
+          </>
+        )}
         {sticker.type === 'tape' && (
           <div className={cn(
-            "w-24 h-8 border shadow-md flex items-center justify-center opacity-90",
+            "w-24 h-8 border shadow-md flex items-center justify-center opacity-90 pointer-events-none",
             sticker.content === 'grid' ? "bg-white bg-[radial-gradient(#00000022_1px,transparent_1px)] bg-[size:6px_6px]" : ""
           )} style={{ backgroundColor: sticker.content !== 'grid' ? sticker.content : 'transparent' }}>
              <div className="w-full h-px bg-white/20" />
           </div>
         )}
-        {sticker.type === 'sticker' && (
-          <span className="text-5xl filter drop-shadow-2xl select-none">{sticker.content}</span>
-        )}
         {sticker.type === 'doodle' && (
-          <sticker.content size={36} className="text-[#5A7FB2] filter drop-shadow-md" />
+          <div className="pointer-events-none">
+            <sticker.content size={36} className="text-[#5A7FB2] filter drop-shadow-md" />
+          </div>
         )}
         {sticker.type === 'text' && (
-          <div className="bg-[#F6F0E8]/95 backdrop-blur-md px-5 py-2 border border-black/10 rounded shadow-lg">
+          <div className="bg-[#F6F0E8]/95 backdrop-blur-md px-5 py-2 border border-black/10 rounded shadow-lg pointer-events-none">
              <p className="text-[11px] font-serif italic text-[#24344D] whitespace-nowrap">{sticker.content}</p>
           </div>
         )}
       </div>
 
-      {/* Bounding Box Transformation UI - Only visible on hover and NOT during generation */}
       {!isGenerating && (
-        <div className="absolute -inset-2 border-2 border-[#AFCDF5] opacity-100 lg:opacity-0 lg:group-hover/sticker:opacity-100 transition-opacity pointer-events-none rounded-sm">
-         {/* Corner Resize Handles */}
-         <motion.div 
-           drag
-           dragMomentum={false}
-           dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
-           dragElastic={0}
-           onPointerDown={(e) => e.stopPropagation()}
-           onDrag={(e, info) => {
-              const sensitivity = 0.02;
-              updateStickerNoHistory(sticker.id, { scale: Math.max(0.2, sticker.scale + (info.delta.x + info.delta.y) * sensitivity) });
-           }}
-           onDragEnd={() => pushToHistory(stickers)}
-           className="absolute -bottom-2 -right-2 w-6 h-6 bg-white border-2 border-[#AFCDF5] rounded-full cursor-nwse-resize pointer-events-auto z-[80] shadow-md active:scale-125 transition-transform" 
-         />
-         <div className="absolute -top-2 -right-2 w-4 h-4 bg-white border-2 border-[#AFCDF5] rounded-full pointer-events-none opacity-50" />
-         <div className="absolute -top-2 -left-2 w-4 h-4 bg-white border-2 border-[#AFCDF5] rounded-full pointer-events-none opacity-50" />
-         <div className="absolute -bottom-2 -left-2 w-4 h-4 bg-white border-2 border-[#AFCDF5] rounded-full pointer-events-none opacity-50" />
+        <div className="absolute -inset-4 border-2 border-[#AFCDF5]/50 opacity-100 lg:opacity-0 lg:group-hover/sticker:opacity-100 transition-opacity pointer-events-none rounded-sm">
+          <div className="absolute inset-0 pointer-events-auto">
+            {/* Scale Handle */}
+            <motion.div 
+              drag
+              dragMomentum={false}
+              dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
+              dragElastic={0}
+              onPointerDown={(e) => e.stopPropagation()}
+              onDrag={(e, info) => {
+                 const sensitivity = 0.02;
+                 updateStickerNoHistory(sticker.id, { scale: Math.max(0.2, sticker.scale + (info.delta.x + info.delta.y) * sensitivity) });
+              }}
+              onDragEnd={() => pushToHistory(stickers)}
+              className="absolute -bottom-2 -right-2 w-6 h-6 bg-white border-2 border-[#AFCDF5] rounded-full cursor-nwse-resize z-[80] shadow-md" 
+            />
+            
+            {/* Rotate Handle */}
+            <motion.div 
+              drag
+              dragMomentum={false}
+              dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
+              dragElastic={0}
+              onPointerDown={(e) => e.stopPropagation()}
+              onDrag={(e, info) => {
+                 const sensitivity = 1.8;
+                 updateStickerNoHistory(sticker.id, { rotation: sticker.rotation - info.delta.x * sensitivity });
+              }}
+              onDragEnd={() => pushToHistory(stickers)}
+              className="absolute -bottom-14 left-1/2 -translate-x-1/2 w-10 h-10 bg-white rounded-full shadow-2xl border-2 border-[#AFCDF5] flex items-center justify-center cursor-pointer z-[80]"
+            >
+               <RotateCcw size={16} className="text-[#5A7FB2]" />
+            </motion.div>
 
-         {/* Rotation Handle - Bottom Center */}
-         <motion.div 
-           drag
-           dragMomentum={false}
-           dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
-           dragElastic={0}
-           onPointerDown={(e) => e.stopPropagation()}
-           onDrag={(e, info) => {
-              const sensitivity = 1.8;
-              updateStickerNoHistory(sticker.id, { rotation: sticker.rotation - info.delta.x * sensitivity });
-           }}
-           onDragEnd={() => pushToHistory(stickers)}
-           className="absolute -bottom-14 left-1/2 -translate-x-1/2 w-10 h-10 bg-white rounded-full shadow-2xl border-2 border-[#AFCDF5] flex items-center justify-center cursor-pointer pointer-events-auto active:scale-110 z-[80]"
-         >
-            <RotateCcw size={16} className="text-[#5A7FB2]" />
-         </motion.div>
-
-         {/* Delete Button - Top Center or Floating */}
-         <button 
-           onPointerDown={(e) => e.stopPropagation()}
-           onClick={(e) => { e.stopPropagation(); pushToHistory(stickers.filter(s => s.id !== sticker.id)); }}
-           className="absolute -top-12 left-1/2 -translate-x-1/2 w-8 h-8 bg-white rounded-full shadow-lg border-2 border-red-100 flex items-center justify-center cursor-pointer pointer-events-auto hover:bg-red-50 text-red-500 transition-colors z-[80]"
-         >
-            <Scissors size={14} />
-         </button>
-      </div>
+            {/* Delete Button */}
+            <button 
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) => { 
+                e.stopPropagation(); 
+                const filtered = stickers.filter(s => s.id !== sticker.id);
+                pushToHistory(filtered);
+                setStickers(filtered);
+              }}
+              className="absolute -top-12 left-1/2 -translate-x-1/2 w-8 h-8 bg-white rounded-full shadow-lg border-2 border-red-100 flex items-center justify-center cursor-pointer hover:bg-red-50 text-red-500 z-[80]"
+            >
+               <Scissors size={14} />
+            </button>
+          </div>
+        </div>
       )}
     </motion.div>
   );
@@ -197,15 +210,18 @@ export default function ResultPage() {
     await new Promise(resolve => setTimeout(resolve, 100));
 
     // Capture the final memoir "Truly" - This bakes everything into one image
-    const element = document.getElementById('final-memoir-capture');
+    const element = document.getElementById('photo-strip-preview-wrapper');
     if (element) {
       try {
+        const isOverlay = selectedFrame.type === 'overlay';
         const dataUrl = await toPng(element, { 
-          pixelRatio: 2.5, // High quality
-          backgroundColor: 'transparent', // Ensure no background is captured
+          pixelRatio: isOverlay ? 1 : 2.5, // 1:1 if we use fixed dimensions, else high density
+          canvasWidth: isOverlay ? 1200 : undefined,
+          canvasHeight: isOverlay ? 1800 : undefined,
+          backgroundColor: 'transparent',
           style: {
-            transform: 'none', // Remove any scale transforms
-            boxShadow: 'none', // Remove shadows that create extra space
+            transform: 'none',
+            boxShadow: 'none',
             margin: '0',
             padding: '0'
           },
@@ -466,7 +482,11 @@ export default function ResultPage() {
                                  onClick={() => addSticker(item)}
                                  className="aspect-square bg-white rounded-[20px] border border-black/5 hover:border-[#AFCDF5] hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center justify-center text-3xl shadow-sm"
                                >
-                                  {item.content}
+                                  {typeof item.content === 'string' && item.content.startsWith('/images/') ? (
+                                    <img src={item.content} alt={item.label} className="w-12 h-12 object-contain" />
+                                  ) : (
+                                    item.content
+                                  )}
                                </button>
                              ))}
                           </div>
@@ -524,8 +544,8 @@ export default function ResultPage() {
            <div id="scrapbook-workspace-content" className="relative p-12 sm:p-16 flex flex-col items-center scale-[0.75] sm:scale-90 lg:scale-100 origin-center">
               <div className="absolute top-12 left-1/2 -translate-x-1/2 w-40 h-12 bg-white/20 backdrop-blur-sm border border-white/10 rotate-[-1deg] -z-10 shadow-sm" />
               
-              <div id="final-memoir-capture" className="relative group lg:scale-[1.15] origin-center transition-transform duration-500">
-                 <div className="relative shadow-[0_40px_80px_-15px_rgba(36,52,77,0.3)]">
+              <div id="final-memoir-capture" className="relative group lg:scale-[1.25] origin-center transition-transform duration-500">
+                 <div id="photo-strip-preview-wrapper" className="relative shadow-[0_40px_100px_-15px_rgba(36,52,77,0.35)]">
                    <PhotoStripPreview 
                       photos={capturedPhotos} 
                       frame={selectedFrame} 
@@ -540,6 +560,7 @@ export default function ResultPage() {
                         sticker={sticker}
                         updateStickerNoHistory={updateStickerNoHistory}
                         pushToHistory={pushToHistory}
+                        setStickers={setStickers}
                         stickers={stickers}
                         isGenerating={isGenerating}
                       />
@@ -644,12 +665,17 @@ export default function ResultPage() {
                        ))}
                     </div>
                  </div>
-
                  {/* Scrollable Frame List - Fixed padding to prevent clipping */}
                  <div className="flex-1 min-h-[300px] lg:min-h-0 overflow-y-auto pr-2 hide-scrollbar pb-12">
                     <FrameSelector 
                       selectedFrame={selectedFrame}
-                      onSelect={setSelectedFrame}
+                      onSelect={(frame) => {
+                        setSelectedFrame(frame);
+                        if (frame.layoutId) {
+                          const matchingLayout = layouts.find(l => l.id === frame.layoutId);
+                          if (matchingLayout) setSelectedLayout(matchingLayout);
+                        }
+                      }}
                       selectedLayout={selectedLayout}
                       activeCategory={activeFrameCategory}
                       layoutMode="grid"

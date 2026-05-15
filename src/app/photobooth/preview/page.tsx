@@ -174,10 +174,10 @@ export default function PreviewPage() {
                <div className="flex flex-col sm:flex-row items-center sm:items-start justify-center gap-8 sm:gap-12">
                   
                   {/* Photo Strip (The Static Memoir) */}
-                  <div className="flex flex-col items-center w-full max-w-[280px]">
+                  <div className="flex flex-col items-center w-full max-w-[320px]">
                      <h3 className="text-[10px] font-black text-[#24344D]/30 uppercase tracking-[0.5em] mb-6">Printed Strip</h3>
-                     <div id="photo-strip-element" className="relative flex flex-col items-center">
-                       <div className="relative w-fit">
+                     <div id="photo-strip-element" className="relative flex flex-col items-center w-full">
+                       <div className="relative w-full shadow-[0_20px_50px_rgba(0,0,0,0.1)]">
                          {finalMemoir ? (
                            <motion.img 
                              initial={{ opacity: 0 }}
@@ -187,7 +187,7 @@ export default function PreviewPage() {
                              alt="Final Memoir" 
                            />
                          ) : (
-                           <>
+                           <div className="w-full">
                              <PhotoStripPreview 
                                 photos={photos} 
                                 frame={selectedFrame} 
@@ -215,7 +215,13 @@ export default function PreviewPage() {
                                    </div>
                                  )}
                                  {sticker.type === 'sticker' && (
-                                   <span className="text-5xl filter drop-shadow-2xl">{sticker.content}</span>
+                                   <>
+                                     {typeof sticker.content === 'string' && sticker.content.startsWith('/images/') ? (
+                                       <img src={sticker.content} alt="Sticker" className="w-20 h-auto filter drop-shadow-2xl select-none" />
+                                     ) : (
+                                       <span className="text-5xl filter drop-shadow-2xl">{sticker.content}</span>
+                                     )}
+                                   </>
                                  )}
                                  {sticker.type === 'doodle' && (
                                    <div className="text-[#5A7FB2] filter drop-shadow-md">
@@ -233,7 +239,7 @@ export default function PreviewPage() {
                                  )}
                                </div>
                              ))}
-                           </>
+                           </div>
                          )}
                        </div>
                      </div>
