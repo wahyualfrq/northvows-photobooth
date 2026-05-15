@@ -33,7 +33,8 @@ export default function PhotoStripPreview({ photos, frame, layout }: PhotoStripP
           frame.theme === 'dark' ? "bg-[#24344D] text-white" : "bg-white text-[#24344D]"
         )}
         style={{
-          width: layout.cols > layout.rows ? '420px' : '280px',
+          width: '100%',
+          maxWidth: layout.cols > layout.rows ? '420px' : '280px',
           aspectRatio: `${layout.cols} / ${layout.rows + 0.6}`,
           backgroundColor: frame.id === 'vintage-blue' ? '#AFCDF5' : 
                            frame.id === 'denim-memories' ? '#5A7FB2' : 

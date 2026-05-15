@@ -31,6 +31,7 @@ export default function CameraView({ onComplete, selectedLayout, selectedFrame, 
   const [timerDuration, setTimerDuration] = useState(3);
   const [retroGrain, setRetroGrain] = useState(false);
   const [dateStamp, setDateStamp] = useState(true);
+  const [showTimerOptions, setShowTimerOptions] = useState(false);
   
   const [isMirrored, setIsMirrored] = useState(true);
   
@@ -145,19 +146,19 @@ export default function CameraView({ onComplete, selectedLayout, selectedFrame, 
   };
 
   return (
-    <div className="w-full flex flex-col lg:flex-row gap-16 items-start justify-start lg:pl-4">
+    <div className="w-full flex flex-col lg:flex-row gap-8 lg:gap-16 items-start justify-start lg:pl-4 px-2 sm:px-0">
       {/* Left Column: Cinematic Camera Preview */}
-      <div className="w-full max-w-[600px] space-y-20 mt-16 lg:-ml-26">
+      <div className="w-full max-w-[600px] space-y-12 sm:space-y-20 mt-2 sm:mt-16 lg:-ml-26 mx-auto">
         <div className="relative aspect-[4/4.2] w-full flex items-center justify-center">
           {/* Main Camera Body Frame */}
           <img 
             src="/images/CameraPict.webp" 
             alt="Vintage Camera Body" 
-            className="absolute inset-0 w-full h-full object-contain z-10 pointer-events-none scale-[1.3]"
+            className="absolute inset-0 w-full h-full object-contain z-10 pointer-events-none scale-[1.15] sm:scale-[1.3]"
           />
 
           {/* LCD Screen Area (Webcam Feed) */}
-          <div className="absolute top-[13%] left-[-2%] right-[17%] bottom-[11%] z-0 bg-black overflow-hidden shadow-inner">
+          <div className="absolute top-[16.2%] sm:top-[13%] left-[-0.4%] sm:left-[-2%] right-[19.5%] sm:right-[17%] bottom-[15.8%] sm:bottom-[11%] z-0 bg-black overflow-hidden shadow-inner">
             <div className="w-full h-full relative">
               <Webcam
                 audio={false}
@@ -235,7 +236,7 @@ export default function CameraView({ onComplete, selectedLayout, selectedFrame, 
         </div>
 
         {/* Shutter & Basic Controls */}
-        <div className="flex justify-center items-center gap-8 -mt-12 relative z-20">
+        <div className="flex justify-center items-center gap-4 sm:gap-8 -mt-6 sm:-mt-12 relative z-20">
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
@@ -275,7 +276,7 @@ export default function CameraView({ onComplete, selectedLayout, selectedFrame, 
             )}
           >
             <div className="w-full h-full rounded-full bg-secondary flex items-center justify-center text-white group-hover:scale-95 transition-transform duration-500 shadow-2xl shadow-secondary/40">
-              <Camera className="w-8 h-8" />
+              <Camera className="w-6 h-6 sm:w-8 sm:h-8" />
             </div>
             {/* Pulsing Ring when ready */}
             {!isCapturing && (
@@ -295,14 +296,100 @@ export default function CameraView({ onComplete, selectedLayout, selectedFrame, 
           >
             <FlipHorizontal className="w-4 h-4" />
           </motion.button>
+
+          {/* Mobile-Only Timer Toggle */}
+          <div className="relative lg:hidden">
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => setShowTimerOptions(!showTimerOptions)}
+              disabled={isCapturing}
+              className={cn(
+                "p-3 rounded-full transition-all shadow-sm disabled:opacity-20",
+                timerDuration > 0 ? "text-secondary bg-secondary/10" : "text-[#24344D]/30 hover:text-secondary hover:bg-white"
+              )}
+            >
+              <Timer className="w-4 h-4" />
+            </motion.button>
+
+            <AnimatePresence>
+              {showTimerOptions && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9, y: 10 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9, y: 10 }}
+                  className="absolute bottom-full mb-4 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-xl border border-white p-2 rounded-2xl shadow-2xl flex flex-col gap-1 z-[100]"
+                >
+                  {[0, 3, 5, 10].map((t) => (
+                    <button
+                      key={t}
+                      onClick={() => {
+                        setTimerDuration(t);
+                        setShowTimerOptions(false);
+                      }}
+                      className={cn(
+                        "px-4 py-2 rounded-xl text-[9px] font-black whitespace-nowrap transition-all",
+                        timerDuration === t ? "bg-secondary text-white" : "hover:bg-secondary/10 text-secondary"
+                      )}
+                    >
+                      {t === 0 ? 'Off' : t + 's'}
+                    </button>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </div>
 
       {/* Right side container for Live Feed, Tools and Filters */}
-      <div className="flex-1 flex flex-col gap-12 lg:ml-16">
-        <div className="flex flex-col lg:flex-row gap-16 items-start">
+      <div className="flex-1 w-full flex flex-col gap-8 lg:gap-12 lg:ml-16">
+        {/* Cinematic Filters - Horizontal Scroll - TOP on Mobile */}
+        <div className="order-1 lg:order-2 space-y-5 w-full">
+           <div className="flex items-center gap-3">
+              <Filter size={16} className="text-secondary" />
+              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[#24344D]/40">Studio Filters</span>
+           </div>
+           <div className="flex gap-4 overflow-x-auto py-4 hide-scrollbar -mx-2 px-2 max-w-[800px]">
+              {filters.map((f) => (
+                <button
+                  key={f.id}
+                  disabled={isCapturing}
+                  onClick={() => setActiveFilter(f)}
+                  className={cn(
+                    "flex-shrink-0 w-24 group transition-all duration-300",
+                    isCapturing && "opacity-50 grayscale"
+                  )}
+                >
+                  <div className={cn(
+                    "aspect-square rounded-lg border-2 mb-2 overflow-hidden transition-all duration-500 bg-[#FAF8F4]",
+                    activeFilter.id === f.id ? "border-secondary shadow-lg scale-105" : "border-transparent"
+                  )}>
+                    <div className={cn("w-full h-full relative", f.class)}>
+                       <Webcam
+                          audio={false}
+                          mirrored={isMirrored}
+                          videoConstraints={{ width: 120, height: 160, facingMode }}
+                          className="w-full h-full object-cover opacity-80"
+                       />
+                       <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                    </div>
+                  </div>
+                  <span className={cn(
+                    "text-[9px] font-black uppercase tracking-tighter block text-center truncate",
+                    activeFilter.id === f.id ? "text-secondary" : "text-[#24344D]/40"
+                  )}>
+                    {f.name}
+                  </span>
+                </button>
+              ))}
+           </div>
+        </div>
+
+        {/* Live Feed & Tools - BOTTOM on Mobile */}
+        <div className="order-2 lg:order-1 flex flex-col lg:flex-row gap-8 lg:gap-16 items-start">
           {/* Middle Column: Live Shot Preview Grid */}
-          <div className="hidden xl:flex flex-col gap-6 pt-6">
+          <div className="flex xl:flex flex-col gap-6 pt-6 w-full xl:w-auto">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[#24344D]/40">Live Feed</span>
@@ -316,10 +403,10 @@ export default function CameraView({ onComplete, selectedLayout, selectedFrame, 
             </div>
             
             <div 
-              className="grid gap-3"
+              className="grid gap-3 mx-auto xl:mx-0"
               style={{ 
                 gridTemplateColumns: `repeat(${selectedLayout.cols}, minmax(0, 1fr))`,
-                width: selectedLayout.cols * 100 + 'px'
+                width: 'fit-content'
               }}
             >
               {Array.from({ length: totalShots }).map((_, i) => (
@@ -329,7 +416,7 @@ export default function CameraView({ onComplete, selectedLayout, selectedFrame, 
                     "aspect-[3/4] bg-white rounded-xl border-2 overflow-hidden relative group transition-all duration-500",
                     capturedPhotos[i] ? "border-white shadow-md" : "border-dashed border-[#24344D]/10 bg-[#FAF8F4]/50"
                   )}
-                  style={{ width: '100px' }}
+                  style={{ width: '80px', height: '106px' }}
                 >
                   {capturedPhotos[i] ? (
                     <>
@@ -451,8 +538,8 @@ export default function CameraView({ onComplete, selectedLayout, selectedFrame, 
            </div>
         </div>
 
-        {/* Shutter Speed / Timer */}
-        <div className="space-y-5">
+        {/* Shutter Speed / Timer - Hidden on Mobile */}
+        <div className="hidden lg:block space-y-5">
            <div className="flex items-center gap-3">
               <Timer size={16} className="text-secondary" />
               <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[#24344D]/40">Interval Timer</span>
@@ -478,47 +565,7 @@ export default function CameraView({ onComplete, selectedLayout, selectedFrame, 
       </div>
     </div>
 
-        {/* Cinematic Filters - Horizontal Scroll */}
-        <div className="space-y-5 w-full">
-           <div className="flex items-center gap-3">
-              <Filter size={16} className="text-secondary" />
-              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[#24344D]/40">Studio Filters</span>
-           </div>
-           <div className="flex gap-4 overflow-x-auto py-4 hide-scrollbar -mx-2 px-2 max-w-[800px]">
-              {filters.map((f) => (
-                <button
-                  key={f.id}
-                  disabled={isCapturing}
-                  onClick={() => setActiveFilter(f)}
-                  className={cn(
-                    "flex-shrink-0 w-24 group transition-all duration-300",
-                    isCapturing && "opacity-50 grayscale"
-                  )}
-                >
-                  <div className={cn(
-                    "aspect-square rounded-lg border-2 mb-2 overflow-hidden transition-all duration-500 bg-[#FAF8F4]",
-                    activeFilter.id === f.id ? "border-secondary shadow-lg scale-105" : "border-transparent"
-                  )}>
-                    <div className={cn("w-full h-full relative", f.class)}>
-                       <Webcam
-                          audio={false}
-                          mirrored={isMirrored}
-                          videoConstraints={{ width: 120, height: 160, facingMode }}
-                          className="w-full h-full object-cover opacity-80"
-                       />
-                       <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-                    </div>
-                  </div>
-                  <span className={cn(
-                    "text-[9px] font-black uppercase tracking-tighter block text-center truncate",
-                    activeFilter.id === f.id ? "text-secondary" : "text-[#24344D]/40"
-                  )}>
-                    {f.name}
-                  </span>
-                </button>
-              ))}
-           </div>
-        </div>
+
       </div>
 
       {/* Aesthetic Upload Prompt Modal */}
@@ -531,65 +578,88 @@ export default function CameraView({ onComplete, selectedLayout, selectedFrame, 
             className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-[#24344D]/30 backdrop-blur-xl"
           >
             <motion.div 
-              initial={{ scale: 0.95, y: 30, opacity: 0 }}
-              animate={{ scale: 1, y: 0, opacity: 1 }}
-              exit={{ scale: 0.95, y: 30, opacity: 0 }}
-              className="bg-white/90 rounded-[40px] p-12 max-w-md w-full shadow-[0_32px_64px_-16px_rgba(36,52,77,0.3)] border border-white relative overflow-hidden text-center"
+              initial={{ scale: 0.9, rotate: -2, opacity: 0 }}
+              animate={{ scale: 1, rotate: 0, opacity: 1 }}
+              exit={{ scale: 0.9, rotate: 2, opacity: 0 }}
+              className="relative max-w-sm w-full group"
             >
-              {/* Decorative Background Element */}
-              <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/10 rounded-full blur-3xl" />
-              <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-accent/20 rounded-full blur-3xl" />
+              {/* Decorative Stacked Photos Effect */}
+              <div className="absolute inset-0 bg-white shadow-lg rounded-sm -rotate-2 translate-x-1 translate-y-1 opacity-40" />
+              <div className="absolute inset-0 bg-white shadow-md rounded-sm rotate-1 -translate-x-1 translate-y-2 opacity-60" />
               
-              {/* Top Gradient Bar */}
-              <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-primary via-secondary to-accent opacity-80" />
-              
-              {/* Close Button */}
-              <button 
-                onClick={() => setShowUploadPrompt(false)}
-                className="absolute top-6 right-6 p-2 rounded-full hover:bg-black/5 text-[#24344D]/20 hover:text-secondary transition-all"
-              >
-                <X size={20} />
-              </button>
-
-              <div className="relative mb-10">
-                <div className="w-24 h-24 bg-gradient-to-br from-white to-[#FAF8F4] rounded-[28px] flex items-center justify-center mx-auto shadow-sm border border-white">
-                   <div className="w-20 h-20 bg-secondary/[0.03] rounded-[24px] flex items-center justify-center text-secondary/60">
-                      <Image size={36} strokeWidth={1.5} />
-                   </div>
+              {/* Main Polaroid Frame */}
+              <div className="relative bg-[#F5F5F3] p-4 sm:p-5 pt-10 sm:pt-12 pb-8 sm:pb-10 rounded-sm shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-white/50 flex flex-col items-center">
+                
+                {/* Scrapbook Tape Detail */}
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-30 pointer-events-none">
+                  <div className="w-24 h-8 bg-white/40 backdrop-blur-[2px] border border-white/20 rotate-[-2deg] shadow-sm flex items-center justify-center">
+                     <div className="w-full h-px bg-white/10" />
+                  </div>
                 </div>
-                {/* Badge */}
-                <div className="absolute -bottom-2 right-[30%] bg-secondary text-white text-[8px] font-black px-3 py-1.5 rounded-full shadow-lg border-2 border-white uppercase tracking-tighter">
-                  {totalShots} Slots
-                </div>
-              </div>
 
-              <div className="space-y-2 mb-10">
-                <h3 className="text-3xl font-serif italic text-secondary leading-tight">Gallery Selection</h3>
-                <p className="text-[10px] text-[#24344D]/40 font-black uppercase tracking-[0.3em]">Moment to Memory</p>
-              </div>
-
-              <div className="bg-secondary/[0.02] border border-secondary/5 rounded-3xl p-6 mb-10">
-                <p className="text-[11px] text-[#24344D]/70 leading-relaxed font-medium">
-                  Harap pilih tepat <span className="text-secondary font-black text-sm px-1.5">{totalShots} foto</span> dari galeri Anda untuk melengkapi layout <span className="text-secondary font-black italic">{selectedLayout.id}</span>.
-                </p>
-              </div>
-
-              <div className="flex flex-col gap-4">
-                <button
-                  onClick={() => {
-                    setShowUploadPrompt(false);
-                    setTimeout(() => document.getElementById('gallery-upload')?.click(), 400);
-                  }}
-                  className="w-full py-5 bg-secondary text-white rounded-[20px] text-[11px] font-black uppercase tracking-[0.25em] shadow-[0_12px_24px_-8px_rgba(79,109,145,0.4)] hover:shadow-[0_20px_32px_-8px_rgba(79,109,145,0.5)] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300"
-                >
-                  Buka Galeri
-                </button>
-                <button
+                {/* Close Button */}
+                <button 
                   onClick={() => setShowUploadPrompt(false)}
-                  className="text-[10px] font-black uppercase tracking-widest text-[#24344D]/25 hover:text-secondary transition-all"
+                  className="absolute top-4 right-4 p-2 rounded-full hover:bg-black/5 text-[#24344D]/20 hover:text-secondary transition-all z-40"
                 >
-                  Kembali
+                  <X size={18} />
                 </button>
+
+                {/* Photo Area (Placeholder/Preview) */}
+                <div className="w-full aspect-[4/5] bg-[#1a1a1a] rounded-[1px] relative overflow-hidden mb-8 shadow-inner group/photo transition-transform duration-700">
+                  <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center space-y-4">
+                     <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center text-white/20 group-hover/photo:scale-110 group-hover/photo:text-secondary transition-all duration-500">
+                        <Image size={32} strokeWidth={1} />
+                     </div>
+                     <div className="space-y-1">
+                        <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Select {totalShots} Photos</p>
+                        <p className="text-[8px] text-white/15 uppercase tracking-widest font-bold">PNG, JPG, or JPEG</p>
+                     </div>
+                  </div>
+                  
+                  {/* Subtle Grain Texture Over Photo Area */}
+                  <div className="absolute inset-0 pointer-events-none opacity-[0.03] mix-blend-overlay bg-[url('https://www.transparenttextures.com/patterns/natural-paper.png')]" />
+                  
+                  {/* Inner Shadow Glow */}
+                  <div className="absolute inset-0 pointer-events-none shadow-[inset_0_0_40px_rgba(0,0,0,0.4)]" />
+                </div>
+
+                {/* Text Content Area */}
+                <div className="w-full text-center space-y-4 mb-8">
+                  <div className="relative">
+                    <h3 className="text-2xl sm:text-3xl font-serif italic text-[#5D79A6] leading-tight">Gallery Selection</h3>
+                    <div className="absolute -right-2 -top-1">
+                       <div className="bg-[#5D79A6] text-white text-[7px] font-black px-2 py-1 rounded-full shadow-lg border-2 border-white uppercase tracking-tighter">
+                         {totalShots} Slots
+                       </div>
+                    </div>
+                  </div>
+                  <p className="text-[9px] text-[#8EA3C0] font-black uppercase tracking-[0.4em]">Memory to Memoir</p>
+                  
+                  <div className="h-px w-12 bg-[#D9E1EC] mx-auto mt-2" />
+                </div>
+
+                {/* Action Buttons */}
+                <div className="w-full space-y-4 px-2">
+                  <button
+                    onClick={() => {
+                      setShowUploadPrompt(false);
+                      setTimeout(() => document.getElementById('gallery-upload')?.click(), 400);
+                    }}
+                    className="w-full py-4 bg-[#5D79A6] text-white rounded-full text-[10px] font-black uppercase tracking-[0.25em] shadow-[0_10px_20px_rgba(93,121,166,0.2)] hover:shadow-[0_15px_25px_rgba(93,121,166,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-300"
+                  >
+                    Buka Galeri
+                  </button>
+                  <button
+                    onClick={() => setShowUploadPrompt(false)}
+                    className="w-full text-[9px] font-black uppercase tracking-widest text-[#24344D]/25 hover:text-[#5D79A6] transition-all"
+                  >
+                    Kembali Ke Studio
+                  </button>
+                </div>
+
+                {/* Subtle Paper Grain Global */}
+                <div className="absolute inset-0 pointer-events-none opacity-[0.02] bg-[url('https://www.transparenttextures.com/patterns/natural-paper.png')]" />
               </div>
             </motion.div>
           </motion.div>

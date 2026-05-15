@@ -29,8 +29,10 @@ export default function FrameSelector({
   return (
     <div className="w-full">
       <div className={cn(
-        "flex gap-6 sm:gap-10 pb-12 pt-6 hide-scrollbar px-4",
-        layoutMode === 'horizontal' ? "overflow-x-auto flex-nowrap snap-x" : "flex-wrap justify-center overflow-y-auto"
+        "pb-12 pt-6 hide-scrollbar px-4",
+        layoutMode === 'horizontal' 
+          ? "flex gap-6 sm:gap-10 overflow-x-auto flex-nowrap snap-x" 
+          : "grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-8 justify-items-center"
       )}>
         <AnimatePresence mode="popLayout">
           {filteredFrames.map((frame, index) => (
@@ -44,8 +46,10 @@ export default function FrameSelector({
               whileTap={{ scale: 0.98 }}
               onClick={() => onSelect(frame)}
               className={cn(
-                "flex-shrink-0 relative soft-transition group",
-                selectedLayout.cols > selectedLayout.rows ? "w-56" : "w-32 sm:w-40"
+                "relative soft-transition group",
+                layoutMode === 'horizontal' 
+                  ? (selectedLayout.cols > selectedLayout.rows ? "w-56 flex-shrink-0" : "w-32 sm:w-40 flex-shrink-0")
+                  : "w-full max-w-[160px] sm:max-w-none"
               )}
             >
               {/* Scrapbook Tape Detail */}
